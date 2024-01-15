@@ -46,10 +46,10 @@
       </row>
     </data>
   </object>
-  <object class="GtkDialog" id="lxterminal_preferences">
+  <object class="GtkDialog" id="lxtermc_preferences">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
-    <property name="title" translatable="yes">LXTerminal Preferences</property>
+    <property name="title" translatable="yes">LXtermc Preferences</property>
     <property name="resizable">False</property>
     <property name="type_hint">normal</property>
     <child internal-child="vbox">

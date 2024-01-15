@@ -1,10 +1,10 @@
 [Desktop Entry]
-_Name=LXTerminal
+_Name=LXtermc
 _GenericName=Terminal
 _Comment=Use the command line
-TryExec=lxterminal
-Exec=lxterminal
-Icon=lxterminal
+TryExec=lxtermc
+Exec=lxtermc
+Icon=lxtermc
 Type=Application
 Categories=GTK;System;TerminalEmulator;
 _Keywords=console;command line;execute;

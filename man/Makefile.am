@@ -1,8 +1,8 @@
 man_MANS = \
-	lxterminal.1
+	lxtermc.1
 
 man_XMANS = \
-	lxterminal.xml
+	lxtermc.xml
 
 EXTRA_DIST = \
 	$(man_MANS) \
@@ -11,8 +11,8 @@ EXTRA_DIST = \
 
 if ENABLE_REGENERATE_MAN
 
-lxterminal.1: lxterminal.xml
-	$(XSLTPROC) -nonet http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl $<        
+lxtermc.1: lxtermc.xml
+	$(XSLTPROC) -nonet http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl $<
 
 CLEANFILES = $(man_MANS) 
 else

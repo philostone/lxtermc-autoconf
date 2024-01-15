@@ -1,8 +1,8 @@
 ## Process this file with automake to produce Makefile.in
 
-bin_PROGRAMS = lxterminal
+bin_PROGRAMS = lxtermc
 
-lxterminal_CPPFLAGS = \
+lxtermc_CPPFLAGS = \
 	-I$(top_srcdir) \
 	-DPACKAGE_BIN_DIR=\""$(bindir)"\" \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
@@ -11,16 +11,16 @@ lxterminal_CPPFLAGS = \
 	$(ADDITIONAL_FLAGS) \
 	$(G_CAST_CHECKS)
 
-lxterminal_SOURCES = \
+lxtermc_SOURCES = \
 	unixsocket.h \
 	unixsocket.c \
 	setting.h \
 	setting.c \
-	lxterminal.h \
-	lxterminal.c \
+	lxtermc.h \
+	lxtermc.c \
 	preferences.h \
 	preferences.c
 
-lxterminal_LDADD = \
+lxtermc_LDADD = \
 		$(PACKAGE_LIBS) \
 		$(INTLLIBS)

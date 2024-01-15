@@ -1,9 +1,9 @@
-default_config_DATA = lxterminal.conf
-default_configdir = $(datadir)/lxterminal
+default_config_DATA = lxtermc.conf
+default_configdir = $(datadir)/lxtermc
 
-uidir=$(datadir)/lxterminal
+uidir=$(datadir)/lxtermc
 ui_in_files= \
-	lxterminal-preferences.glade
+	lxtermc-preferences.glade
 
 ui_files = $(ui_in_files:.glade=.ui)
 
@@ -15,19 +15,19 @@ ui_DATA = $(ui_files) menu.ui
 
 CLEANFILES = $(ui_files)
 
-lxterminal.desktop_in_files = lxterminal.desktop.in
-lxterminal.desktop.in_DATA = $(lxterminal.desktop_in_files:.desktop.in=.desktop)
+lxtermc.desktop_in_files = lxtermc.desktop.in
+lxtermc.desktop.in_DATA = $(lxtermc.desktop_in_files:.desktop.in=.desktop)
 @INTLTOOL_DESKTOP_RULE@
-lxterminal.desktop.indir = $(datadir)/applications
+lxtermc.desktop.indir = $(datadir)/applications
 
-lxterminal_images_DATA = lxterminal.png
-lxterminal_imagesdir = $(datadir)/icons/hicolor/128x128/apps
+lxtermc_images_DATA = lxtermc.png
+lxtermc_imagesdir = $(datadir)/icons/hicolor/128x128/apps
 
 EXTRA_DIST = \
-	lxterminal.conf.in \
-	$(lxterminal_images_DATA) \
-	$(lxterminal.desktop_in_files) \
-	$(lxterminal.desktop.in_DATA) \
+	lxtermc.conf.in \
+	$(lxtermc_images_DATA) \
+	$(lxtermc.desktop_in_files) \
+	$(lxtermc.desktop.in_DATA) \
 	$(ui_DATA) \
 	$(ui_in_files) \
 	$(default_config_DATA)
