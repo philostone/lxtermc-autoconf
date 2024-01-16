@@ -1,8 +1,8 @@
 AC_PREREQ([2.72])
 AC_INIT([lxtermc],[0.0.1],[http://github.com/philostone/lxtermc])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([foreign])
 
-
+AC_CONFIG_HEADERS([config.h])
 # - ste, old ??? AM_CONFIG_HEADER(config.h)
 # Support silent build rules. Disable by either passing --disable-silent-rules
 # to configure or passing V=1 to make

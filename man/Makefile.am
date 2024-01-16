@@ -8,14 +8,14 @@ EXTRA_DIST = \
 	$(man_MANS) \
 	$(man_XMANS)
 
+# ste - understand this later ...
+#if ENABLE_REGENERATE_MAN
 
-if ENABLE_REGENERATE_MAN
+#lxtermc.1: lxtermc.xml
+#	$(XSLTPROC) -nonet http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl $<
 
-lxtermc.1: lxtermc.xml
-	$(XSLTPROC) -nonet http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl $<
-
-CLEANFILES = $(man_MANS) 
-else
+#CLEANFILES = $(man_MANS) 
+#else
 
 $(man_MANS):
 	@echo ""
@@ -23,6 +23,4 @@ $(man_MANS):
 	@echo "       in order to regenerate man pages."
 	@echo ""
 	@false
-endif
-
-
+#endif
