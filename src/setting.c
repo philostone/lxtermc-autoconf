@@ -182,43 +182,43 @@ save_setting(Setting *setting, gchar *fname)
 	}
 */
 	int i;
-	g_return_if_fail (setting != NULL);
+	g_return_if_fail(setting != NULL);
 	//print_setting();
 	
 	/* Push settings to GKeyFile. */
 	g_key_file_set_string(setting->keyfile, GENERAL_GROUP, FONT_NAME, setting->font_name);
-#if VTE_CHECK_VERSION (0, 38, 0)
+//#if VTE_CHECK_VERSION (0, 38, 0)
 	gchar *p = gdk_rgba_to_string(&setting->background_color);
-#else
-	gchar *p = gdk_color_to_string(&setting->background_color);
-#endif
+//#else
+//	gchar *p = gdk_color_to_string(&setting->background_color);
+//#endif
 	if (p != NULL) g_key_file_set_string(setting->keyfile, GENERAL_GROUP, BG_COLOR, p);
 	g_free(p);
-#if VTE_CHECK_VERSION (0, 38, 0)
+//#if VTE_CHECK_VERSION (0, 38, 0)
 	p = gdk_rgba_to_string(&setting->foreground_color);
-#else
+/*#else
 	g_key_file_set_integer(setting->keyfile, GENERAL_GROUP, BG_ALPHA, setting->background_alpha);
 	p = gdk_color_to_string(&setting->foreground_color);
-#endif
+#endif*/
 	if (p != NULL) g_key_file_set_string(setting->keyfile, GENERAL_GROUP, FG_COLOR, p);
 
 	/* Save color palette */
 	for (i = 0; i < 16; i++) {
 		gchar *palette_color_key = g_strdup_printf(PALETTE_COLOR_PREFIX "%d", i);
-#if VTE_CHECK_VERSION (0, 38, 0)
+//#if VTE_CHECK_VERSION (0, 38, 0)
 		p = gdk_rgba_to_string(&setting->palette_color[i]);
-#else
-		p = gdk_color_to_string(&setting->palette_color[i]);
-#endif
+//#else
+//		p = gdk_color_to_string(&setting->palette_color[i]);
+//#endif
 		if (p != NULL) g_key_file_set_string(setting->keyfile, GENERAL_GROUP, palette_color_key, p);
 	}
 	g_key_file_set_string(setting->keyfile, GENERAL_GROUP, COLOR_PRESET, setting->color_preset);
 
 	g_free(p);
 	g_key_file_set_boolean(setting->keyfile, GENERAL_GROUP, DISALLOW_BOLD, setting->disallow_bold);
-#if VTE_CHECK_VERSION (0, 52, 0)
+//#if VTE_CHECK_VERSION (0, 52, 0)
 	g_key_file_set_boolean(setting->keyfile, GENERAL_GROUP, BOLD_BRIGHT, setting->bold_bright);
-#endif
+//#endif
 	g_key_file_set_boolean(setting->keyfile, GENERAL_GROUP, CURSOR_BLINKS, setting->cursor_blink);
 	g_key_file_set_boolean(setting->keyfile, GENERAL_GROUP, CURSOR_UNDERLINE, setting->cursor_underline);
 	g_key_file_set_boolean(setting->keyfile, GENERAL_GROUP, AUDIBLE_BELL, setting->audible_bell);
@@ -381,14 +381,14 @@ load_setting(Setting *setting, gchar *fname)
 	setting = g_slice_new0(Setting);
 
 	/* Initialize nonzero integer values to defaults. */
-#if VTE_CHECK_VERSION (0, 38, 0)
+//#if VTE_CHECK_VERSION (0, 38, 0)
 	setting->background_color.alpha = setting->foreground_color.alpha = 1;
 	setting->foreground_color.red = setting->foreground_color.green = setting->foreground_color.blue = (gdouble) 170/255;
-#else
+/*#else
 	setting->background_alpha = 65535;
 	setting->foreground_color.red = setting->foreground_color.green = setting->foreground_color.blue = 0xaaaa;
 #endif
-
+*/
 	/* Load configuration. */
 	setting->keyfile = g_key_file_new();
 	GError *error = NULL;
@@ -398,24 +398,24 @@ load_setting(Setting *setting, gchar *fname)
 		setting->font_name = g_key_file_get_string(setting->keyfile, GENERAL_GROUP, FONT_NAME, NULL);
 		char * p = g_key_file_get_string(setting->keyfile, GENERAL_GROUP, BG_COLOR, NULL);
 		if (p != NULL) {
-#if VTE_CHECK_VERSION (0, 38, 0)
+//#if VTE_CHECK_VERSION (0, 38, 0)
 			gdk_rgba_parse(&setting->background_color, p);
-#else
-			gdk_color_parse(p, &setting->background_color);
-		}
-		setting->background_alpha = g_key_file_get_integer(setting->keyfile, GENERAL_GROUP, BG_ALPHA, &error);
-		if (error && (error->code == G_KEY_FILE_ERROR_KEY_NOT_FOUND)) {
-			/* Set default value if key not found! */
-			setting->background_alpha = 65535;
-#endif
+//#else
+//			gdk_color_parse(p, &setting->background_color);
+//		}
+//		setting->background_alpha = g_key_file_get_integer(setting->keyfile, GENERAL_GROUP, BG_ALPHA, &error);
+//		if (error && (error->code == G_KEY_FILE_ERROR_KEY_NOT_FOUND)) {
+//			/* Set default value if key not found! */
+//			setting->background_alpha = 65535;
+//#endif
 		}
 		p = g_key_file_get_string(setting->keyfile, GENERAL_GROUP, FG_COLOR, NULL);
 		if (p != NULL) {
-#if VTE_CHECK_VERSION (0, 38, 0)
+//#if VTE_CHECK_VERSION (0, 38, 0)
 			gdk_rgba_parse(&setting->foreground_color, p);
-#else
-			gdk_color_parse(p, &setting->foreground_color);
-#endif
+//#else
+//			gdk_color_parse(p, &setting->foreground_color);
+//#endif
 		}
 
 		setting->color_preset = g_key_file_get_string(setting->keyfile, GENERAL_GROUP, COLOR_PRESET, NULL);
@@ -424,11 +424,11 @@ load_setting(Setting *setting, gchar *fname)
 				gchar *palette_color_key = g_strdup_printf(PALETTE_COLOR_PREFIX "%d", i);
 				p = g_key_file_get_string(setting->keyfile, GENERAL_GROUP, palette_color_key, NULL);
 				if (p != NULL) {
-#if VTE_CHECK_VERSION (0, 38, 0)
+//#if VTE_CHECK_VERSION (0, 38, 0)
 					gdk_rgba_parse(&setting->palette_color[i], p);
-#else
-					gdk_color_parse(p, &setting->palette_color[i]);
-#endif
+//#else
+//					gdk_color_parse(p, &setting->palette_color[i]);
+//#endif
 				} else {
 					goto color_preset_does_not_exist;
 				}
@@ -437,18 +437,18 @@ load_setting(Setting *setting, gchar *fname)
 color_preset_does_not_exist:
 			setting->color_preset = color_presets[0].name;
 			for (i = 0; i < 16; i++) {
-#if VTE_CHECK_VERSION (0, 38, 0)
+//#if VTE_CHECK_VERSION (0, 38, 0)
 				gdk_rgba_parse(&setting->palette_color[i], color_presets[0].palette[i]);
-#else
-				gdk_color_parse(color_presets[0].palette[i], &setting->palette_color[i]);
-#endif
+//#else
+//				gdk_color_parse(color_presets[0].palette[i], &setting->palette_color[i]);
+//#endif
 			}
 		}
 
 		setting->disallow_bold = g_key_file_get_boolean(setting->keyfile, GENERAL_GROUP, DISALLOW_BOLD, NULL);
-#if VTE_CHECK_VERSION (0, 52, 0)
+//#if VTE_CHECK_VERSION (0, 52, 0)
 		setting->bold_bright = g_key_file_get_boolean(setting->keyfile, GENERAL_GROUP, BOLD_BRIGHT, NULL);
-#endif
+//#endif
 		setting->cursor_blink = g_key_file_get_boolean(setting->keyfile, GENERAL_GROUP, CURSOR_BLINKS, NULL);
 		setting->cursor_underline = g_key_file_get_boolean(setting->keyfile, GENERAL_GROUP, CURSOR_UNDERLINE, NULL);
 		setting->audible_bell = g_key_file_get_boolean(setting->keyfile, GENERAL_GROUP, AUDIBLE_BELL, NULL);

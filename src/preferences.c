@@ -45,9 +45,9 @@ preferences_dialog_font_set_event(GtkFontButton *widget, Setting *setting)
 static gboolean
 preferences_dialog_background_color_set_event(GtkWidget *widget, Setting *setting)
 {
-#if VTE_CHECK_VERSION (0, 38, 0)
+//#if VTE_CHECK_VERSION (0, 38, 0)
 	gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(widget), &setting->background_color);
-#else
+/*#else
 	gtk_color_button_get_color(GTK_COLOR_BUTTON(widget), &setting->background_color);
 	setting->background_alpha = gtk_color_button_get_alpha(GTK_COLOR_BUTTON(widget));
 
@@ -55,7 +55,7 @@ preferences_dialog_background_color_set_event(GtkWidget *widget, Setting *settin
 		setting->background_alpha = 1;
 	}
 #endif
-
+*/
 	GtkComboBox *w = GTK_COMBO_BOX(gtk_builder_get_object(builder, "combobox_color_preset"));
 	gtk_combo_box_set_active(w, preset_custom_id);
 	setting->color_preset = color_presets[preset_custom_id].name;
@@ -66,11 +66,11 @@ preferences_dialog_background_color_set_event(GtkWidget *widget, Setting *settin
 static gboolean
 preferences_dialog_foreground_color_set_event(GtkWidget *widget, Setting *setting)
 {
-#if VTE_CHECK_VERSION (0, 38, 0)
+//#if VTE_CHECK_VERSION (0, 38, 0)
 	gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(widget), &setting->foreground_color);
-#else
-	gtk_color_button_get_color(GTK_COLOR_BUTTON(widget), &setting->foreground_color);
-#endif
+//#else
+//	gtk_color_button_get_color(GTK_COLOR_BUTTON(widget), &setting->foreground_color);
+//#endif
 
 	GtkComboBox *w = GTK_COMBO_BOX(gtk_builder_get_object(builder, "combobox_color_preset"));
 	gtk_combo_box_set_active(w, preset_custom_id);
@@ -85,11 +85,11 @@ preferences_dialog_palette_color_set_event(GtkColorButton *widget, Setting *sett
 	for (int i = 0;i < 16; i++) {
 		gchar *object_key = g_strdup_printf("color_%i", i);
 		GtkColorButton *w = GTK_COLOR_BUTTON(gtk_builder_get_object(builder, object_key));
-#if VTE_CHECK_VERSION (0, 38, 0)
+//#if VTE_CHECK_VERSION (0, 38, 0)
 		gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(w), &setting->palette_color[i]);
-#else
-		gtk_color_button_get_color(GTK_COLOR_BUTTON(w), &setting->palette_color[i]);
-#endif
+//#else
+//		gtk_color_button_get_color(GTK_COLOR_BUTTON(w), &setting->palette_color[i]);
+//#endif
 		g_free(object_key);
 	}
 
@@ -112,35 +112,35 @@ preferences_dialog_palette_preset_changed_event(GtkComboBox *widget, Setting *se
 	setting->color_preset = color_presets[active].name;
 
 	w = GTK_WIDGET(gtk_builder_get_object(builder, "background_color"));
-#if VTE_CHECK_VERSION (0, 38, 0)
+//#if VTE_CHECK_VERSION (0, 38, 0)
 	gdk_rgba_parse(&setting->background_color, color_presets[active].background_color);
 	gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(w), &setting->background_color);
-#else
+/*#else
 	gdk_color_parse(color_presets[active].background_color, &setting->background_color);
 	setting->background_alpha = 65535;
 	gtk_color_button_set_color(GTK_COLOR_BUTTON(w), &setting->background_color);
 	gtk_color_button_set_alpha(GTK_COLOR_BUTTON(w), 65535);
 #endif
-
+*/
 	w = GTK_WIDGET(gtk_builder_get_object(builder, "foreground_color"));
-#if VTE_CHECK_VERSION (0, 38, 0)
+//#if VTE_CHECK_VERSION (0, 38, 0)
 	gdk_rgba_parse(&setting->foreground_color, color_presets[active].foreground_color);
 	gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(w), &setting->foreground_color);
-#else
+/*#else
 	gdk_color_parse(color_presets[active].foreground_color, &setting->foreground_color);
 	gtk_color_button_set_color(GTK_COLOR_BUTTON(w), &setting->foreground_color);
 #endif
-
+*/
 	for (int i = 0; i < 16; i++) {
 		gchar *object_key = g_strdup_printf("color_%i", i);
 		w = GTK_WIDGET(gtk_builder_get_object(builder, object_key));
-#if VTE_CHECK_VERSION (0, 38, 0)
+//#if VTE_CHECK_VERSION (0, 38, 0)
 		gdk_rgba_parse(&setting->palette_color[i], color_presets[active].palette[i]);
 		gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(w), &setting->palette_color[i]);
-#else
+/*#else
 		gdk_color_parse(color_presets[active].palette[i], &setting->palette_color[i]);
 		gtk_color_button_set_color(GTK_COLOR_BUTTON(w), &setting->palette_color[i]);
-#endif
+#endif*/
 		g_free(object_key);
 	}
 	return FALSE;
@@ -290,32 +290,32 @@ terminal_preferences_dialog(GtkAction *action, LXTerminal *terminal)
 		G_CALLBACK(preferences_dialog_font_set_event), setting);
 
 	w = GTK_WIDGET(gtk_builder_get_object(builder, "background_color"));
-#if VTE_CHECK_VERSION (0, 38, 0)
+//#if VTE_CHECK_VERSION (0, 38, 0)
 	gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(w), &setting->background_color);
-#else
+/*#else
 	gtk_color_button_set_color(GTK_COLOR_BUTTON(w), &setting->background_color);
 	gtk_color_button_set_alpha(GTK_COLOR_BUTTON(w), setting->background_alpha);
-#endif
+#endif*/
 	g_signal_connect(G_OBJECT(w), "color-set", 
 		G_CALLBACK(preferences_dialog_background_color_set_event), setting);
 
 	w = GTK_WIDGET(gtk_builder_get_object(builder, "foreground_color"));
-#if VTE_CHECK_VERSION (0, 38, 0)
+//#if VTE_CHECK_VERSION (0, 38, 0)
 	gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(w), &setting->foreground_color);
-#else
-	gtk_color_button_set_color(GTK_COLOR_BUTTON(w), &setting->foreground_color);
-#endif
+//#else
+//	gtk_color_button_set_color(GTK_COLOR_BUTTON(w), &setting->foreground_color);
+//#endif
 	g_signal_connect(G_OBJECT(w), "color-set",
 		G_CALLBACK(preferences_dialog_foreground_color_set_event), setting);
 
 	for (int i = 0; i < 16; i++) {
 		gchar *object_key = g_strdup_printf("color_%i", i);
 		w = GTK_WIDGET(gtk_builder_get_object(builder, object_key));
-#if VTE_CHECK_VERSION (0, 38, 0)
+//#if VTE_CHECK_VERSION (0, 38, 0)
 		gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(w), &setting->palette_color[i]);
-#else
-		gtk_color_button_set_color(GTK_COLOR_BUTTON(w), &setting->palette_color[i]);
-#endif
+//#else
+//		gtk_color_button_set_color(GTK_COLOR_BUTTON(w), &setting->palette_color[i]);
+//#endif
 		g_signal_connect(G_OBJECT(w), "color-set",
 			G_CALLBACK(preferences_dialog_palette_color_set_event), setting);
 		g_free(object_key);
@@ -348,16 +348,16 @@ terminal_preferences_dialog(GtkAction *action, LXTerminal *terminal)
 		G_CALLBACK(preferences_dialog_allow_bold_toggled_event), setting);
 
 	w = GTK_WIDGET(gtk_builder_get_object(builder, "bold_bright"));
-#if VTE_CHECK_VERSION (0, 52, 0)
+//#if VTE_CHECK_VERSION (0, 52, 0)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(w), setting->bold_bright);
 	g_signal_connect(G_OBJECT(w), "toggled",
 		G_CALLBACK(preferences_dialog_generic_toggled_event), &setting->bold_bright);
-#else
+/*#else
 	gtk_widget_hide(w);
 	w = GTK_WIDGET(gtk_builder_get_object(builder, "label_bold_bright"));
 	gtk_widget_hide(w);
 #endif
-
+*/
 	w = GTK_WIDGET(gtk_builder_get_object(builder, "cursor_blink"));
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(w), setting->cursor_blink);
 	g_signal_connect(G_OBJECT(w), "toggled",

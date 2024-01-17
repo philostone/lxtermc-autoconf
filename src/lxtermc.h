@@ -18,14 +18,17 @@
  *  MA 02110-1301, USA.
  */
 
-#ifndef LXTERMINAL_H
-#define LXTERMINAL_H
+#ifndef LXTERMC_H
+#define LXTERMC_H
 
 #include "setting.h"
 
 /* steal from tilda-0.09.6/src/tilda_terminal.c:36 */
 #define DINGUS1 "(((news|telnet|nttp|file|http|ftp|https)://)|(www|ftp)[-A-Za-z0-9]*\\.)[-A-Za-z0-9\\.]+(:[0-9]*)?"
 #define DINGUS2 "(((news|telnet|nttp|file|http|ftp|https)://)|(www|ftp)[-A-Za-z0-9]*\\.)[-A-Za-z0-9\\.]+(:[0-9]*)?/[-A-Za-z0-9_\\$\\.\\+\\!\\*\\(\\),;:@&=\\?/~\\#\\%]*[^]'\\.}>\\) ,\\\"]"
+
+#define LXTERMC_NAME		"lxtermc"
+#define LXTERMC_CONFIG		LXTERMC_NAME".conf"
 
 /* Top level application context. */
 typedef struct _lxtermwindow {
@@ -99,4 +102,4 @@ extern gboolean lxtermc_args(gint argc, gchar **argv, CommandArguments *argument
 extern LXTerminal *lxtermc_init(LXTermWindow *lxtermwin, CommandArguments *arguments);
 extern void terminal_settings_apply_to_all(LXTerminal *terminal);
 
-#endif
+#endif /* LXTERMC_H */
