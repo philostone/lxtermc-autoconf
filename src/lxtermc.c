@@ -1514,7 +1514,8 @@ lxtermc_init(LXTermWindow *lxtermwin, CommandArguments *arguments)
 	if ((geometry_bitmask & WidthValue) && (geometry_bitmask & HeightValue)) {
 		vte_terminal_set_size(VTE_TERMINAL(term->vte), arguments->geometry_columns, arguments->geometry_rows);
 	} else {
-		vte_terminal_set_size(VTE_TERMINAL(term->vte), terminal->setting->geometry_columns, setting->geometry_rows);
+		vte_terminal_set_size(VTE_TERMINAL(term->vte),
+			terminal->setting->geometry_columns, terminal->setting->geometry_rows);
 	}
 
 	/* Add the first terminal to the notebook and the data structures. */
