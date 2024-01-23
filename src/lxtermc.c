@@ -1012,9 +1012,6 @@ term_vte_commit(VteTerminal *vte, gchar *text, guint size, Term *term)
 static void
 term_settings_apply_to_term(LXTerminal *terminal, Term *term)
 {
-			
-	
-//	Setting *setting = get_setting();
 	Setting *setting = terminal->setting;
 	PangoFontDescription *font_desc;
 
@@ -1033,19 +1030,6 @@ term_settings_apply_to_term(LXTerminal *terminal, Term *term)
 	vte_terminal_set_mouse_autohide(VTE_TERMINAL(term->vte), setting->hide_pointer);
 
 	/* Background and foreground colors. */
-			
-// TODO check transparency
-	if (terminal->rgba) {
-		/* vte_terminal_queue_background_update doesn't run without changing background. */
-		vte_terminal_set_color_background(VTE_TERMINAL(term->vte), &setting->foreground_color);
-		vte_terminal_set_background_transparent(VTE_TERMINAL(term->vte), FALSE);
-//		vte_terminal_set_opacity(VTE_TERMINAL(term->vte), setting->background_alpha);
-	} else {
-//		vte_terminal_set_background_transparent(VTE_TERMINAL(term->vte), setting->background_alpha == 65535 ? FALSE : TRUE);
-//		vte_terminal_set_background_saturation(VTE_TERMINAL(term->vte), 1 - ((double) setting->background_alpha / 65535));
-		vte_terminal_set_background_tint_color(VTE_TERMINAL(term->vte), &setting->background_color);
-	}
-
 	const GdkRGBA *palette_color = setting->palette_color;
 	vte_terminal_set_colors(VTE_TERMINAL(term->vte), &setting->foreground_color, &setting->background_color,
 		palette_color, 16);
@@ -1483,7 +1467,7 @@ lxtermc_init(LXTermWindow *lxtermwin, CommandArguments *arguments)
 	gtk_box_pack_start(GTK_BOX(terminal->box), terminal->notebook, TRUE, TRUE, 0);
 
 	/* Initialize tab position. */
-	terminal->tab_position = term_tab_get_position_id(terminal->setting->tab_position);
+	terminal->tab_position = terminal_tab_get_position_id(terminal->setting->tab_position);
 
 	/* Connect signals. */
 	g_signal_connect_swapped(G_OBJECT(terminal->window), "composited-changed",
@@ -1604,7 +1588,7 @@ term_settings_apply(LXTerminal *terminal)
 	terminal->rgba = gtk_widget_is_composited(terminal->window);
 
 	/* Update tab position. */
-	terminal->tab_position = term_tab_get_position_id(terminal->setting->tab_position);
+	terminal->tab_position = terminal_tab_get_position_id(terminal->setting->tab_position);
 	term_tab_set_position(terminal->notebook, terminal->tab_position);
 
 	/* Update menu accelerators. */

@@ -412,12 +412,9 @@ terminal_preferences_dialog(GtkAction *action, LXTerminal *terminal)
 	/* Dismiss dialog. */
 	gtk_widget_destroy(GTK_WIDGET(dialog));
 	if (result == GTK_RESPONSE_OK) {
-			
-// TODO save what setting ???
-// TODO apply to all ???
-		set_setting(setting);
-		save_setting(setting);
-		terminal_settings_apply_to_all(terminal);
+		terminal->setting = setting;
+		save_setting(terminal->setting);
+		term_settings_apply_to_all(terminal);
 	} else {
 		free_setting(&setting);
 	}
