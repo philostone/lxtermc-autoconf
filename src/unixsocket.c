@@ -27,7 +27,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include "lxterminal.h"
+#include "lxtermc.h"
 #include "unixsocket.h"
 
 typedef struct _client_info {
@@ -35,7 +35,7 @@ typedef struct _client_info {
 	int fd;
 } ClientInfo;
 
-static gboolean init(LXTermWindow *lxtermwin, gint argc, gchar **argv);
+//static gboolean init(LXTermWindow *lxtermwin, gint argc, gchar **argv);
 static void start_controller(struct sockaddr_un *sock_addr, LXTermWindow *lxtermwin, int fd);
 static void send_msg_to_controller(int fd, gint argc, gchar **argv);
 static gboolean handle_client(GIOChannel *source, GIOCondition condition, LXTermWindow *lxtermwin);
@@ -54,21 +54,24 @@ static gboolean handle_request(GIOChannel *gio, GIOCondition condition, ClientIn
  * or a user of the controller.
  *
  * This function returns TRUE if this process should keep running and FALSE
- * if it should exit. */
-static gboolean
-init(LXTermWindow *lxtermwin, gint argc, gchar **argv) {
+ * if it should exit.
+ */
+
+/* philostone - lxtermc mod:
+ *
+ */
+
+#define LXTERMC_SOCKET_FMT "%s/."LXTERMC_NAME"-config-socket-%s"
+
+gboolean
+lxtermc_socket_init(LXTermWindow *lxtermwin, gint argc, gchar **argv) {
 
 	/* Formulate the path for the Unix domain socket. */
-//#if GLIB_CHECK_VERSION (2, 28, 0)
-	gchar *socket_path = g_strdup_printf("%s/.lxterminal-config-socket-%s",
+//	gchar *socket_path = g_strdup_printf("%s/."LXTERMC_NAME"-config-socket-%s",
+	gchar *socket_path = g_strdup_printf(LXTERMC_SOCKET_FMT,
 		g_get_user_runtime_dir(),
 		gdk_display_get_name(gdk_display_get_default()));
-/*#else
-	gchar *socket_path = g_strdup_printf("%s/.lxterminal-config-socket-%s",
-		g_get_user_cache_dir(),
-		gdk_display_get_name(gdk_display_get_default()));
-#endif
-*/
+
 	/* Create socket. */
 	int fd = socket(PF_UNIX, SOCK_STREAM, 0);
 	if (fd < 0) {
@@ -82,25 +85,23 @@ init(LXTermWindow *lxtermwin, gint argc, gchar **argv) {
 	sock_addr.sun_family = AF_UNIX;
 	snprintf(sock_addr.sun_path, sizeof(sock_addr.sun_path), "%s", socket_path);
 
-	/* Try to connect to an existing LXTerminal process. */
+	/* Try to connect to an existing LXtermc process. */
 				
-	/* if config version, which this is !!!!, always return true as a new process !!!! */
+	/* if config version, which this is !!!!, NOT always return true as a new process !!!! */
 	/* or should it be if a (different) command-line-provided config file is provided ?????*/
+	/* the latter !!!! */
+// well, new try, keep one (controlling) process, but honor different configs...
 				
 	if (connect(fd, (struct sockaddr *) &sock_addr, sizeof(sock_addr)) == 0) {
 		g_free(socket_path);
+		
+// TODO: what if sending failes ???
 		send_msg_to_controller(fd, argc, argv);
 		return FALSE;
 	}
-
-				
-/* why is unlink used, no file with name socket_path is ever created ?????????? */
-/* unless created by caller, check !!! */
 	unlink(socket_path);
-				
 	g_free(socket_path);
 	start_controller(&sock_addr, lxtermwin, fd);
-/* fd may be closed, if bind(fd...) fails ... */
 	return TRUE;
 
 	err_socket:
@@ -110,6 +111,7 @@ init(LXTermWindow *lxtermwin, gint argc, gchar **argv) {
 
 static void
 start_controller(struct sockaddr_un *sock_addr, LXTermWindow *lxtermwin, int fd) {
+
 	/* Bind to socket. */
 	if (bind(fd, (struct sockaddr *) sock_addr, sizeof(*sock_addr)) < 0) {
 		g_warning("Bind on socket failed: %s\n", g_strerror(errno));
@@ -154,22 +156,20 @@ start_controller(struct sockaddr_un *sock_addr, LXTermWindow *lxtermwin, int fd)
 
 static void
 send_msg_to_controller(int fd, gint argc, gchar **argv) {
+
 	/* Create a glib I/O channel. */
 	GIOChannel *gio = g_io_channel_unix_new(fd);
 	g_io_channel_set_encoding(gio, NULL, NULL);
 
 	/* Push current dir in case it is needed later */
+	/* Use "" as a pointer to '\0' since g_io_channel_write_chars() won't accept NULL */
 	gchar *cur_dir = g_get_current_dir();
 	g_io_channel_write_chars(gio, cur_dir, -1, NULL, NULL);
-
-	/* Use "" as a pointer to '\0' since g_io_channel_write_chars() won't
-	 * accept NULL */
 	g_io_channel_write_chars(gio, "", 1, NULL, NULL);
 	g_free(cur_dir);
 
 	/* push all of argv. */
-	gint i;
-	for (i = 0; i < argc; i ++) {
+	for (gint i = 0; i < argc; i ++) {
 		g_io_channel_write_chars(gio, argv[i], -1, NULL, NULL);
 		g_io_channel_write_chars(gio, "", 1, NULL, NULL);
 	}
@@ -188,6 +188,7 @@ handle_client(GIOChannel *source, GIOCondition condition, LXTermWindow *lxtermwi
 
 static void
 accept_client(GIOChannel *source, LXTermWindow *lxtermwin) {
+
 	/* Accept the new connection. */
 	int fd = accept(g_io_channel_unix_get_fd(source), NULL, NULL);
 	if (fd < 0) {
@@ -217,8 +218,10 @@ accept_client(GIOChannel *source, LXTermWindow *lxtermwin) {
 
 static gboolean
 handle_request(GIOChannel *gio, GIOCondition condition, ClientInfo *info) {
+
 	LXTermWindow *lxtermwin = info->lxtermwin;
 	int fd = info->fd;
+
 	/* Read message. */
 	gchar *msg = NULL;
 	gsize len = 0;
@@ -228,12 +231,11 @@ handle_request(GIOChannel *gio, GIOCondition condition, ClientInfo *info) {
 
 	/* Process message. */
 	if (len > 0) {
+
 		/* Skip the the first (cur_dir) and last '\0' for argument count */
 		gint argc = -1;
 		for (gsize i = 0; i < len; i++) {
-			if (msg[i] == '\0') {
-				argc++;
-			}
+			if (msg[i] == '\0') argc++;
 		}
 		gchar *cur_dir = msg;
 		gchar **argv = g_malloc(argc*sizeof(char *));
@@ -254,7 +256,7 @@ handle_request(GIOChannel *gio, GIOCondition condition, ClientInfo *info) {
 		/* Make sure working directory matches that of the client process */
 		if (arguments.working_directory == NULL)
 			arguments.working_directory = g_strdup(cur_dir);
-		lxterminal_initialize(lxtermwin, &arguments);
+		lxtermc_init(lxtermwin, &arguments);
 	}
 	if (condition & G_IO_HUP) {
 		g_free(msg);
@@ -263,9 +265,4 @@ handle_request(GIOChannel *gio, GIOCondition condition, ClientInfo *info) {
 		return FALSE;
 	}
 	return TRUE;
-}
-
-gboolean
-lxterminal_socket_initialize(LXTermWindow *lxtermwin, gint argc, gchar **argv) {
-	return init(lxtermwin, argc, argv);
 }

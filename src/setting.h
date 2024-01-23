@@ -18,8 +18,8 @@
  *  MA 02110-1301, USA.
  */
 
-#ifndef LXTERMINAL_SETTING_H
-#define LXTERMINAL_SETTING_H
+#ifndef LXTERMC_SETTING_H
+#define LXTERMC_SETTING_H
 
 #include <gtk/gtk.h>
 #include <vte/vte.h>
@@ -83,27 +83,18 @@
 
 /* User preferences. */
 
-/* new individual settings concept */
-/* extern char *cmdline_config; */   /* defined in lxterminal.c */
+/* philostone - new individual settings concept */
 
 typedef struct _setting {
 	GKeyFile *keyfile;			/* Pointer to GKeyFile containing settings */
+	gchar *config;				/* name of file for settings (NULL) for system */
 	char *font_name;			/* Font name */
-#if VTE_CHECK_VERSION (0, 38, 0)
 	GdkRGBA background_color;		/* Background color */
 	GdkRGBA foreground_color;		/* Foreground color */
 	GdkRGBA palette_color[16];		/* Palette colors */
-#else
-	GdkColor background_color;		/* Background color */
-	guint16 background_alpha;		/* Alpha value to go with background color */
-	GdkColor foreground_color;		/* Foreground color */
-	GdkColor palette_color[16];		/* Palette colors */
-#endif
 	const char *color_preset;		/* Color preset name */
 	gboolean disallow_bold;			/* Disallow bolding by VTE */
-#if VTE_CHECK_VERSION (0, 52, 0)
 	gboolean bold_bright;			/* True if bold is bright */
-#endif
 	gboolean cursor_blink;			/* True if cursor blinks */
 	gboolean cursor_underline;		/* True if underline cursor; false if block cursor */
 	gboolean audible_bell;			/* True if audible bell */
@@ -148,13 +139,16 @@ typedef struct _colorpreset {
 	const char *palette[16];
 } ColorPreset;
 
+/* philostone - save setting to setting->config */
+/* if setting->config is NULL system setting is loaded and user config should be used */
+/* load_setting(NULL) -> use system settings (if available) otherwise default setiings */
 #if 0
 extern Setting *get_setting();
 extern void save_setting();
 extern Setting *load_setting();
 #endif
-extern void save_setting(Setting *setting, gchar *fname);
-extern Setting *load_setting(Setting *setting, gchar *fname);
+extern void save_setting(Setting *setting);
+extern Setting *load_setting(gchar *fname);
 
 /* Utils for chsnge setting through preference */
 extern void set_setting(Setting *setting);
@@ -167,4 +161,4 @@ extern void print_setting();
 
 extern ColorPreset color_presets[];
 
-#endif
+#endif /* LXTERMC_SETTING_H */

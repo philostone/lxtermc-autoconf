@@ -32,6 +32,7 @@
 #include "setting.h"
 
 /* Single copy setting*/
+/* philostone - not for this */
 /* Setting *setting; */
 
 ColorPreset color_presets[] = {
@@ -96,32 +97,22 @@ ColorPreset color_presets[] = {
 };
 
 /* Debug print. */
-/* needs extensive rewriting with argument, for individual settings concept deferred ... */
+/* needs extensive rewriting with argument */
+/* philostone - for individual settings concept deferred ... */
 #if 0
 void print_setting()
 {
 	g_return_if_fail (setting != NULL);
 
 	printf("Font name: %s\n", setting->font_name);
-#if VTE_CHECK_VERSION (0, 38, 0)
 	gchar *p = gdk_rgba_to_string(&setting->background_color);
-#else
-	gchar *p = gdk_color_to_string(&setting->background_color);
-#endif
 	printf("Background color: %s\n", p);
 	g_free(p);
-#if VTE_CHECK_VERSION (0, 38, 0)
 	p = gdk_rgba_to_string(&setting->foreground_color);
-#else
-	printf("Background Alpha: %i\n", setting->background_alpha);
-	p = gdk_color_to_string(&setting->foreground_color);
-#endif
 	printf("Foreground color: %s\n", p);
 	g_free(p);
 	printf("Disallow bolding by VTE: %i\n", setting->disallow_bold);
-#if VTE_CHECK_VERSION (0, 52, 0)
 	printf("Bold is bright: %i\n", setting->bold_bright);
-#endif
 	printf("Cursor blinks: %i\n", setting->cursor_blink);
 	printf("Underline blinks: %i\n", setting->cursor_underline);
 	printf("Audible bell: %i\n", setting->audible_bell);
@@ -152,7 +143,7 @@ void print_setting()
 }
 #endif
 
-/* not for individual settings concept */
+/* philostone - not for individual settings concept */
 #if 0
 Setting *
 get_setting()
@@ -171,54 +162,29 @@ set_setting(Setting *new_setting)
 /* Save settings to configuration file. */
 /* void save_setting()  - replaced for individual settings concept */
 void
-save_setting(Setting *setting, gchar *fname)
+save_setting(Setting *setting)
 {
-	/* do not save to command line config */
-/* ######## not required for individual configs concept
-	if ( cmdline_config != NULL )
-	{
-		printf("lxterminal, no saving of potentially altered config settings to command line config file\n");
-		return;
-	}
-*/
-	int i;
 	g_return_if_fail(setting != NULL);
-	//print_setting();
-	
+
 	/* Push settings to GKeyFile. */
 	g_key_file_set_string(setting->keyfile, GENERAL_GROUP, FONT_NAME, setting->font_name);
-//#if VTE_CHECK_VERSION (0, 38, 0)
 	gchar *p = gdk_rgba_to_string(&setting->background_color);
-//#else
-//	gchar *p = gdk_color_to_string(&setting->background_color);
-//#endif
 	if (p != NULL) g_key_file_set_string(setting->keyfile, GENERAL_GROUP, BG_COLOR, p);
 	g_free(p);
-//#if VTE_CHECK_VERSION (0, 38, 0)
 	p = gdk_rgba_to_string(&setting->foreground_color);
-/*#else
-	g_key_file_set_integer(setting->keyfile, GENERAL_GROUP, BG_ALPHA, setting->background_alpha);
-	p = gdk_color_to_string(&setting->foreground_color);
-#endif*/
 	if (p != NULL) g_key_file_set_string(setting->keyfile, GENERAL_GROUP, FG_COLOR, p);
 
 	/* Save color palette */
-	for (i = 0; i < 16; i++) {
+	for (int i = 0; i < 16; i++) {
 		gchar *palette_color_key = g_strdup_printf(PALETTE_COLOR_PREFIX "%d", i);
-//#if VTE_CHECK_VERSION (0, 38, 0)
 		p = gdk_rgba_to_string(&setting->palette_color[i]);
-//#else
-//		p = gdk_color_to_string(&setting->palette_color[i]);
-//#endif
 		if (p != NULL) g_key_file_set_string(setting->keyfile, GENERAL_GROUP, palette_color_key, p);
 	}
 	g_key_file_set_string(setting->keyfile, GENERAL_GROUP, COLOR_PRESET, setting->color_preset);
 
 	g_free(p);
 	g_key_file_set_boolean(setting->keyfile, GENERAL_GROUP, DISALLOW_BOLD, setting->disallow_bold);
-//#if VTE_CHECK_VERSION (0, 52, 0)
 	g_key_file_set_boolean(setting->keyfile, GENERAL_GROUP, BOLD_BRIGHT, setting->bold_bright);
-//#endif
 	g_key_file_set_boolean(setting->keyfile, GENERAL_GROUP, CURSOR_BLINKS, setting->cursor_blink);
 	g_key_file_set_boolean(setting->keyfile, GENERAL_GROUP, CURSOR_UNDERLINE, setting->cursor_underline);
 	g_key_file_set_boolean(setting->keyfile, GENERAL_GROUP, AUDIBLE_BELL, setting->audible_bell);
@@ -253,29 +219,25 @@ save_setting(Setting *setting, gchar *fname)
 	g_key_file_set_string(setting->keyfile, SHORTCUT_GROUP, ZOOM_RESET_ACCEL, setting->zoom_reset_accel);
 
 	/* Convert GKeyFile to text and build path to configuration file. */
+	/* lxtermc, use setting->config as path*/
+	if (!setting->config) {
+		g_warning("save_setting(): no file name stated, nothing is saved\n");
+	} else {
+		gchar *file_data = g_key_file_to_data(setting->keyfile, NULL, NULL);
+		if (file_data != NULL) {
 
-				
-			
-// TODO use fname
-
-	gchar *file_data = g_key_file_to_data(setting->keyfile, NULL, NULL);
-	gchar *config_path = g_build_filename(g_get_user_config_dir(), "lxterminal/lxterminal.conf", NULL);
-
-	if ((file_data != NULL) && (config_path != NULL)) {
-		/* Create the file if necessary. */
-		int fd = open(config_path, O_CREAT | O_WRONLY | O_TRUNC, S_IRUSR | S_IWUSR);
-		if (fd < 0) {
-			g_warning("Configuration file create failed: %s\n", g_strerror(errno));
-		} else {
-			if(write(fd, file_data, strlen(file_data)) < 0)
-				g_warning("Configuration file write failed: %s\n", g_strerror(errno));
-			close(fd);
+			/* Create the file if necessary. */
+			int fd = open(setting->config, O_CREAT | O_WRONLY | O_TRUNC, S_IRUSR | S_IWUSR);
+			if (fd < 0) {
+				g_warning("Configuration file create failed: %s\n", g_strerror(errno));
+			} else {
+				if(write(fd, file_data, strlen(file_data)) < 0)
+					g_warning("Configuration file write failed: %s\n", g_strerror(errno));
+				close(fd);
+			}
 		}
+		g_free(file_data);
 	}
-
-	/* Deallocate memory. */
-	g_free(file_data);
-	g_free(config_path);
 }
 
 /* Deep copy settings. */
@@ -288,6 +250,7 @@ copy_setting(Setting *setting)
 	Setting *new_setting = g_slice_new0(Setting);
 	memcpy(new_setting, setting, sizeof(Setting));
 
+	new_setting->config = g_strdup(setting->config);	// lxtermc
 	new_setting->font_name = g_strdup(setting->font_name);
 	new_setting->tab_position = g_strdup(setting->tab_position);
 	new_setting->word_selection_characters = g_strdup(setting->word_selection_characters);
@@ -312,11 +275,15 @@ copy_setting(Setting *setting)
 void
 free_setting(Setting **setting)
 {
+			
+//TODO: what happenes to arg ???????????
+
 	Setting *setting;
-	g_return_if_fail (setting != NULL && *setting != NULL);
+	g_return_if_fail(setting != NULL && *setting != NULL);
 
 	_setting = *setting;
 
+	g_free(_setting->config);		// lxtermc
 	g_free(_setting->font_name);
 	g_free(_setting->tab_position);
 	g_free(_setting->word_selection_characters);
@@ -338,117 +305,64 @@ free_setting(Setting **setting)
 
 /* Load settings from configuration file. */
 /* required for multiple settings concept */
-/* Setting * load_setting() */
+//Setting * load_setting()
+//Setting *
+//load_setting(Setting *setting)
 Setting *
-load_setting(Setting *setting, gchar *fname)
+load_setting(gchar *fname)
 {
-	int i;
-	gchar *dir = g_build_filename(g_get_user_config_dir(), "lxterminal" , NULL);
-	g_mkdir_with_parents(dir, S_IRUSR | S_IWUSR | S_IXUSR);
-	gchar *user_config_path = g_build_filename(dir, "lxterminal.conf", NULL);
-	g_free(dir);
-	gchar *system_config_path = g_strdup(PACKAGE_DATA_DIR "/lxterminal/lxterminal.conf");
-/*	gchar *config_path = user_config_path; */
-	printf("lxterminal, load_setting() - in priority order if existing\n");
-	printf("lxterminal, load_setting() - cmdline_config '%s'\n", cmdline_config);
-	printf("lxterminal, load_setting() - user_config	'%s'\n", user_config_path);
-	printf("lxterminal, load_setting() - system config  '%s'\n", system_config_path);
-	gchar *config_path = (cmdline_config) ?: user_config_path;
-
-	gboolean need_save = FALSE;
-
-	if (cmdline_config && !g_file_test(cmdline_config, G_FILE_TEST_EXISTS)) {
-		/* invalid config file provided, try user config! */
-		printf("lxterminal, load_setting() - invalid cmdline_config '%s', ignoring!\n", cmdline_config);
-		config_path = user_config_path;
+	if (!fname) {
+		fprintf(stderr, "load_setting() - no file name provided, "
+			"default settings will be applied\n");
 	}
-	if (!g_file_test(user_config_path, G_FILE_TEST_EXISTS)) {
-		/* Load system-wide settings. */
-		config_path = system_config_path;
-		need_save = TRUE;
-	}
-	printf("lxterminal, using ");
-	if (cmdline_config && (config_path == cmdline_config)) {
-		printf("command line ");
-	} else if (config_path == user_config_path) {
-		printf("user ");
-	} else {
-		printf("system ");
-	}
-	printf("config '%s'\n", config_path);
 
 	/* Allocate structure. */
 	setting = g_slice_new0(Setting);
+	setting->config = g_strdup(fname);		// lxtermc
 
 	/* Initialize nonzero integer values to defaults. */
-//#if VTE_CHECK_VERSION (0, 38, 0)
 	setting->background_color.alpha = setting->foreground_color.alpha = 1;
 	setting->foreground_color.red = setting->foreground_color.green = setting->foreground_color.blue = (gdouble) 170/255;
-/*#else
-	setting->background_alpha = 65535;
-	setting->foreground_color.red = setting->foreground_color.green = setting->foreground_color.blue = 0xaaaa;
-#endif
-*/
+
 	/* Load configuration. */
 	setting->keyfile = g_key_file_new();
 	GError *error = NULL;
-	if ((g_file_test(config_path, G_FILE_TEST_EXISTS)) &&
-		(g_key_file_load_from_file(setting->keyfile, config_path,
+	if ((g_file_test(setting->config, G_FILE_TEST_EXISTS)) &&
+			(g_key_file_load_from_file(setting->keyfile, setting->config,
 			G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS, &error))) {
-		setting->font_name = g_key_file_get_string(setting->keyfile, GENERAL_GROUP, FONT_NAME, NULL);
+		setting->font_name = g_key_file_get_string(setting->keyfile,
+			GENERAL_GROUP, FONT_NAME, NULL);
 		char * p = g_key_file_get_string(setting->keyfile, GENERAL_GROUP, BG_COLOR, NULL);
 		if (p != NULL) {
-//#if VTE_CHECK_VERSION (0, 38, 0)
 			gdk_rgba_parse(&setting->background_color, p);
-//#else
-//			gdk_color_parse(p, &setting->background_color);
-//		}
-//		setting->background_alpha = g_key_file_get_integer(setting->keyfile, GENERAL_GROUP, BG_ALPHA, &error);
-//		if (error && (error->code == G_KEY_FILE_ERROR_KEY_NOT_FOUND)) {
-//			/* Set default value if key not found! */
-//			setting->background_alpha = 65535;
-//#endif
 		}
 		p = g_key_file_get_string(setting->keyfile, GENERAL_GROUP, FG_COLOR, NULL);
 		if (p != NULL) {
-//#if VTE_CHECK_VERSION (0, 38, 0)
 			gdk_rgba_parse(&setting->foreground_color, p);
-//#else
-//			gdk_color_parse(p, &setting->foreground_color);
-//#endif
 		}
 
-		setting->color_preset = g_key_file_get_string(setting->keyfile, GENERAL_GROUP, COLOR_PRESET, NULL);
+		setting->color_preset = g_key_file_get_string(setting->keyfile,
+			GENERAL_GROUP, COLOR_PRESET, NULL);
 		if (setting->color_preset) {
-			for (i = 0; i < 16; i++) {
-				gchar *palette_color_key = g_strdup_printf(PALETTE_COLOR_PREFIX "%d", i);
-				p = g_key_file_get_string(setting->keyfile, GENERAL_GROUP, palette_color_key, NULL);
-				if (p != NULL) {
-//#if VTE_CHECK_VERSION (0, 38, 0)
-					gdk_rgba_parse(&setting->palette_color[i], p);
-//#else
-//					gdk_color_parse(p, &setting->palette_color[i]);
-//#endif
-				} else {
-					goto color_preset_does_not_exist;
-				}
+			for (int i = 0; i < 16; i++) {
+				gchar *palette_color_key = g_strdup_printf(PALETTE_COLOR_PREFIX"%d", i);
+				p = g_key_file_get_string(setting->keyfile,
+					GENERAL_GROUP, palette_color_key, NULL);
+				if (p) gdk_rgba_parse(&setting->palette_color[i], p);
+				else  goto color_preset_does_not_exist;
 			}
 		} else {
-color_preset_does_not_exist:
+
+			color_preset_does_not_exist:
 			setting->color_preset = color_presets[0].name;
-			for (i = 0; i < 16; i++) {
-//#if VTE_CHECK_VERSION (0, 38, 0)
-				gdk_rgba_parse(&setting->palette_color[i], color_presets[0].palette[i]);
-//#else
-//				gdk_color_parse(color_presets[0].palette[i], &setting->palette_color[i]);
-//#endif
+			for (int i = 0; i < 16; i++) {
+				gdk_rgba_parse(&setting->palette_color[i],
+					color_presets[0].palette[i]);
 			}
 		}
 
 		setting->disallow_bold = g_key_file_get_boolean(setting->keyfile, GENERAL_GROUP, DISALLOW_BOLD, NULL);
-//#if VTE_CHECK_VERSION (0, 52, 0)
 		setting->bold_bright = g_key_file_get_boolean(setting->keyfile, GENERAL_GROUP, BOLD_BRIGHT, NULL);
-//#endif
 		setting->cursor_blink = g_key_file_get_boolean(setting->keyfile, GENERAL_GROUP, CURSOR_BLINKS, NULL);
 		setting->cursor_underline = g_key_file_get_boolean(setting->keyfile, GENERAL_GROUP, CURSOR_UNDERLINE, NULL);
 		setting->audible_bell = g_key_file_get_boolean(setting->keyfile, GENERAL_GROUP, AUDIBLE_BELL, NULL);
@@ -496,48 +410,32 @@ color_preset_does_not_exist:
 		setting->zoom_out_accel = g_key_file_get_string(setting->keyfile, SHORTCUT_GROUP, ZOOM_OUT_ACCEL, NULL);
 		setting->zoom_reset_accel = g_key_file_get_string(setting->keyfile, SHORTCUT_GROUP, ZOOM_RESET_ACCEL, NULL);
 	}
-	g_free(system_config_path);
-	g_free(user_config_path);
 
 	/* Default configuration strings. */
-	if (setting->font_name == NULL) setting->font_name = g_strdup("monospace 10");
-	if (setting->tab_position == NULL) setting->tab_position = g_strdup("top");
-	if (setting->word_selection_characters == NULL)
+	if (!setting->font_name) setting->font_name = g_strdup("monospace 10");
+	if (!setting->tab_position) setting->tab_position = g_strdup("top");
+	if (!setting->word_selection_characters)
 		setting->word_selection_characters = g_strdup("-A-Za-z0-9,./?%&#:_~");
 
 	/* Default configuration for shortcut group settings. */
-	if (setting->new_window_accel == NULL)
-		setting->new_window_accel = g_strdup(NEW_WINDOW_ACCEL_DEF);
-	if (setting->new_tab_accel == NULL)
-		setting->new_tab_accel = g_strdup(NEW_TAB_ACCEL_DEF);
-	if (setting->close_tab_accel == NULL)
-		setting->close_tab_accel = g_strdup(CLOSE_TAB_ACCEL_DEF);
-	if (setting->close_window_accel == NULL)
+	if (!setting->new_window_accel) setting->new_window_accel = g_strdup(NEW_WINDOW_ACCEL_DEF);
+	if (!setting->new_tab_accel) setting->new_tab_accel = g_strdup(NEW_TAB_ACCEL_DEF);
+	if (!setting->close_tab_accel) setting->close_tab_accel = g_strdup(CLOSE_TAB_ACCEL_DEF);
+	if (!setting->close_window_accel)
 		setting->close_window_accel = g_strdup(CLOSE_WINDOW_ACCEL_DEF);
-	if (setting->copy_accel == NULL)
-		setting->copy_accel = g_strdup(COPY_ACCEL_DEF);
-	if (setting->paste_accel == NULL)
-		setting->paste_accel = g_strdup(PASTE_ACCEL_DEF);
-	if (setting->name_tab_accel == NULL)
-		setting->name_tab_accel = g_strdup(NAME_TAB_ACCEL_DEF);
-	if (setting->previous_tab_accel == NULL)
+	if (!setting->copy_accel) setting->copy_accel = g_strdup(COPY_ACCEL_DEF);
+	if (!setting->paste_accel) setting->paste_accel = g_strdup(PASTE_ACCEL_DEF);
+	if (!setting->name_tab_accel) setting->name_tab_accel = g_strdup(NAME_TAB_ACCEL_DEF);
+	if (!setting->previous_tab_accel)
 		setting->previous_tab_accel = g_strdup(PREVIOUS_TAB_ACCEL_DEF);
-	if (setting->next_tab_accel == NULL)
-		setting->next_tab_accel = g_strdup(NEXT_TAB_ACCEL_DEF);
-	if (setting->move_tab_left_accel == NULL)
+	if (!setting->next_tab_accel) setting->next_tab_accel = g_strdup(NEXT_TAB_ACCEL_DEF);
+	if (!setting->move_tab_left_accel)
 		setting->move_tab_left_accel = g_strdup(MOVE_TAB_LEFT_ACCEL_DEF);
-	if (setting->move_tab_right_accel == NULL)
+	if (!setting->move_tab_right_accel)
 		setting->move_tab_right_accel = g_strdup(MOVE_TAB_RIGHT_ACCEL_DEF);
-	if (setting->zoom_in_accel == NULL)
-		setting->zoom_in_accel = g_strdup(ZOOM_IN_ACCEL_DEF);
-	if (setting->zoom_out_accel == NULL)
-		setting->zoom_out_accel = g_strdup(ZOOM_OUT_ACCEL_DEF);
-	if (setting->zoom_reset_accel == NULL)
-		setting->zoom_reset_accel = g_strdup(ZOOM_RESET_ACCEL_DEF);
-	if (need_save) {
-/*		save_setting(); */
-		save_setting(setting, fname);
-	}
-	//print_setting();
+	if (!setting->zoom_in_accel) setting->zoom_in_accel = g_strdup(ZOOM_IN_ACCEL_DEF);
+	if (!setting->zoom_out_accel) setting->zoom_out_accel = g_strdup(ZOOM_OUT_ACCEL_DEF);
+	if (!setting->zoom_reset_accel) setting->zoom_reset_accel = g_strdup(ZOOM_RESET_ACCEL_DEF);
+
 	return setting;
 }

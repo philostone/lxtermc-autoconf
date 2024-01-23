@@ -18,10 +18,10 @@
  *  MA 02110-1301, USA.
  */
 
-#ifndef LXTERMINAL_PREFERENCES_H
-#define LXTERMINAL_PREFERENCES_H
+#ifndef LXTERMC_PREFERENCES_H
+#define LXTERMC_PREFERENCES_H
 
 extern void terminal_preferences_dialog(GtkAction *action, LXTerminal *terminal);
 extern gint terminal_tab_get_position_id(gchar *position);
 
-#endif
+#endif /* LXTERMC_PREFERENCES_H */

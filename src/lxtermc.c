@@ -38,14 +38,10 @@
 #include <sys/stat.h>
 #include <pwd.h>
 
-/*
-#if VTE_CHECK_VERSION (0, 46, 0)
 #define PCRE2_CODE_UNIT_WIDTH 0
 #include <pcre2.h>
-#endif
-*/
 
-#include "lxterminal.h"
+#include "lxtermc.h"
 #include "setting.h"
 #include "preferences.h"
 #include "unixsocket.h"
@@ -90,12 +86,7 @@ static void term_window_title_changed_event(GtkWidget *vte, Term *term);
 static gboolean term_close_window_confirmation_event(GtkWidget *widget, GdkEventButton *event, LXTerminal *terminal);
 static gboolean term_close_window_confirmation_dialog(LXTerminal *terminal);
 static void term_window_exit(LXTerminal *terminal, GObject *where_the_object_was);
-
-//#if VTE_CHECK_VERSION (0, 38, 0)
 static void term_child_exited_event(VteTerminal *vte, gint status, Term *term);
-//#else
-//static void term_child_exited_event(VteTerminal *vte, Term *term);
-//#endif
 static void term_close_button_event(GtkButton *button, Term *term);
 static gboolean term_tab_button_press_event(GtkWidget *widget, GdkEventButton *event, Term *term);
 static void term_vte_cursor_moved_event(VteTerminal *vte, Term *term);
@@ -118,17 +109,17 @@ static char *saved_menu_accelerator = NULL;
 /* Help when user enters an invalid command. */
 static gchar usage_display[] = {
 	"Usage:\n"
-	"  lxterminal [Options...] - LXTerminal is a terminal emulator\n\n"
+	"  lxtermc [Options...] - LXtermc is a terminal emulator\n\n"
 	"Options:\n"
-	"  -e, --command=STRING			 Execute the argument to this option inside the terminal\n"
-	"  -c, --config=FNAME			   Use file FNAME instead of user or system default\n"
-	"  --geometry=COLUMNSxROWS		  Set the terminal's size\n"
-	"  -l, --loginshell				 Execute login shell\n"
-	"  -t, -T, --title=,\n"
-	"	--tabs=NAME[,NAME[,NAME[...]]] Set the terminal's title\n"
-	"  --working-directory=DIRECTORY	Set the terminal's working directory\n"
-	"  --no-remote					  Do not accept or send remote commands\n"
-	"  -v, --version					Version information\n"
+	"  -e, --command=STRING              Execute the argument to this option inside the terminal\n"
+	"  -c, --config=FNAME                Use file FNAME instead of user or system default\n"
+	"  --geometry=COLUMNSxROWS           Set the terminal's size\n"
+	"  -l, --loginshell                  Execute login shell\n"
+	"  -t, -T, --title=,\n               Set the terminal's title\n"
+	"  --tabs=NAME[,NAME[,NAME[...]]]    Start tab[s] with name[s]\n"
+	"  --working-directory=DIRECTORY     Set the terminal's working directory\n"
+	"  --no-remote                       Do not accept or send remote commands\n"
+	"  -v, --version                     Version information\n"
 };
 
 /* Actions for menu bar items. */
@@ -189,25 +180,14 @@ static GtkActionEntry vte_menu_items[] =
 static void
 term_get_border(Term *term, GtkBorder *border)
 {
-//#if VTE_CHECK_VERSION (0, 38, 0)
 	GtkBorder padding;
 	gtk_style_context_get_padding(gtk_widget_get_style_context(term->vte),
-						          gtk_widget_get_state_flags(term->vte),
-						          &padding);
+	          gtk_widget_get_state_flags(term->vte),
+	          &padding);
 	border->left = padding.left;
 	border->right = padding.right;
 	border->top = padding.top;
 	border->bottom = padding.bottom;
-
-//#elif VTE_CHECK_VERSION(0, 24, 0)
-//	/* Style property, new in 0.24.0, replaces the function below. */
-//	GtkBorder *border;
-//	gtk_widget_style_get(term->vte, "inner-border", &_border, NULL);
-//	memcpy(border, _border, sizeof(GtkBorder));
-//#else
-//	/* Deprecated function produces a warning. */
-//	vte_terminal_get_padding(VTE_TERMINAL(term->vte), &border->left, &border->top);
-//#endif
 }
 
 /* Set the position of the tabs on the main window. */
@@ -237,7 +217,10 @@ term_get_current_dir(LXTerminal *terminal)
 
 			
 /* philostone - should't this be __linux__ ??? */
-#ifdef __linux
+//#ifdef __linux
+#ifdef __linux__
+fprintf(stderr, "term_get_current_dir() - this is a linux build\n");
+
 	/* Try to get the working directory from /proc. */
 	gint current = gtk_notebook_get_current_page(GTK_NOTEBOOK(terminal->notebook));
 	if (current != -1) {
@@ -256,9 +239,7 @@ term_get_current_dir(LXTerminal *terminal)
 
 	}
 #endif
-	if (proc_cwd == NULL) {
-		proc_cwd = g_get_current_dir();
-	}
+	if (proc_cwd == NULL) proc_cwd = g_get_current_dir();
 	return proc_cwd;
 }
 
@@ -270,21 +251,13 @@ term_get_preferred_shell () {
 	const gchar *fallback_shell = "/bin/sh";
 	const gchar *shell = g_getenv("SHELL");
 	if (geteuid() == getuid() && getegid() == getgid()) {
-		if (shell != NULL) {
-			if (access(shell, X_OK) == 0) {
-				return shell;
-			}
-		}
+		if (shell != NULL && access(shell, X_OK) == 0) return shell;
 	}
 	pw = getpwuid(getuid());
 	if (pw && pw->pw_shell) {
-		if (access (pw->pw_shell, X_OK) == 0) {
-			return pw->pw_shell;
-		}
+		if (access (pw->pw_shell, X_OK) == 0) return pw->pw_shell;
 	}
-	if (access (fallback_shell, X_OK) == 0) {
-		return fallback_shell;
-	}
+	if (access (fallback_shell, X_OK) == 0) return fallback_shell;
 	return NULL;
 }
 
@@ -319,7 +292,7 @@ term_update_alt(LXTerminal *terminal)
 	Term * term;
 
 	/* disable alt when the option is switched on or terminal has no other tabs */
-	if (get_setting()->disable_alt || terminal->terms->len <= 1) {
+	if (terminal->setting->disable_alt || terminal->terms->len <= 1) {
 		for (i = 0; i < terminal->terms->len; i++) {
 			term = g_ptr_array_index(terminal->terms, i);
 			if (term->closure != NULL) {
@@ -463,11 +436,7 @@ static void
 term_close_tab_activate_event(GtkAction *action, LXTerminal *terminal)
 {
 	Term *term = g_ptr_array_index(terminal->terms, gtk_notebook_get_current_page(GTK_NOTEBOOK(terminal->notebook)));
-//#if VTE_CHECK_VERSION (0, 38, 0)
 	term_child_exited_event(VTE_TERMINAL(term->vte), 0, term);
-//#else
-//	term_child_exited_event(VTE_TERMINAL(term->vte), term);
-//#endif
 }
 
 /* Handler for "activate" signal on File/Close Window menu item.
@@ -480,11 +449,7 @@ term_close_window_activate_event(GtkAction *action, LXTerminal * terminal)
 	/* Play it safe and delete tabs one by one. */
 	while(terminal->terms->len > 0) {
 		Term *term = g_ptr_array_index(terminal->terms, 0);
-//#if VTE_CHECK_VERSION (0, 38, 0)
 		term_child_exited_event(VTE_TERMINAL(term->vte), 0, term);
-//#else
-//		term_child_exited_event(VTE_TERMINAL(term->vte), term);
-//#endif
 	}
 }
 
@@ -539,7 +504,7 @@ term_clear_activate_event(GtkAction *action, LXTerminal *terminal)
 {
 	Term *term = g_ptr_array_index(terminal->terms, gtk_notebook_get_current_page(GTK_NOTEBOOK(terminal->notebook)));
 	vte_terminal_set_scrollback_lines(VTE_TERMINAL(term->vte), 0);
-	vte_terminal_set_scrollback_lines(VTE_TERMINAL(term->vte), get_setting()->scrollback);
+	vte_terminal_set_scrollback_lines(VTE_TERMINAL(term->vte), terminal->setting->scrollback);
 }
 
 /* Handler for "response" signal on Name Tab dialog. */
@@ -678,11 +643,12 @@ term_move_tab_right_activate_event(GtkAction *action, LXTerminal *terminal)
 	term_move_tab_execute(terminal, 1);
 }
 
-//#if !(VTE_CHECK_VERSION (0, 38, 0))
 /* Make scale code uniform across VTE versions */
 static void
 vte_terminal_set_font_scale(VteTerminal *vte, gdouble scale)
 {
+			
+//TODO how to get setting for vte ???
 	Setting *setting = get_setting();
 	const PangoFontDescription *font_desc;
 	PangoFontDescription *new_font_desc;
@@ -693,7 +659,6 @@ vte_terminal_set_font_scale(VteTerminal *vte, gdouble scale)
 	vte_terminal_set_font(vte, new_font_desc);
 	pango_font_description_free(new_font_desc);
 }
-//#endif
 
 /* Helper for terminal zoom in/out. */
 static void
@@ -834,7 +799,7 @@ term_close_window_confirmation_event(GtkWidget *widget, GdkEventButton *event, L
 static gboolean
 term_close_window_confirmation_dialog(LXTerminal *terminal)
 {
-	if (!get_setting()->disable_confirm && terminal->terms->len > 1) {
+	if (!terminal->setting->disable_confirm && terminal->terms->len > 1) {
 		GtkWidget *dialog = gtk_message_dialog_new(
 			GTK_WINDOW(terminal->window), GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO,
 			_("You are about to close %d tabs. Are you sure you want to continue?"), terminal->terms->len);
@@ -870,13 +835,8 @@ term_window_exit(LXTerminal *terminal, GObject *where_the_object_was)
 }
 
 /* Handler for "child-exited" signal on VTE. */
-//#if VTE_CHECK_VERSION (0, 38, 0)
 static void
 term_child_exited_event(VteTerminal *vte, gint status, Term *term)
-//#else
-//static void
-//term_child_exited_event(VteTerminal *vte, Term *term)
-//#endif
 {
 	LXTerminal *terminal = term->parent;
 	g_signal_handler_disconnect(G_OBJECT(term->vte), term->exit_handler_id);
@@ -911,11 +871,7 @@ term_child_exited_event(VteTerminal *vte, gint status, Term *term)
 static void
 term_close_button_event(GtkButton *button, Term *term)
 {
-//#if VTE_CHECK_VERSION (0, 38, 0)
 	term_child_exited_event(VTE_TERMINAL(term->vte), 0, term);
-//#else
-//	term_child_exited_event(VTE_TERMINAL(term->vte), term);
-//#endif
 }
 
 /* Handler for "button-press-event" signal on a notebook tab. */
@@ -933,22 +889,8 @@ term_tab_button_press_event(GtkWidget *widget, GdkEventButton *event, Term *term
 static gchar *
 term_get_match_at(VteTerminal *vte, Term *term, GdkEventButton *event)
 {
-//#if VTE_CHECK_VERSION (0, 38, 0)
 	gint tag;
 	return vte_terminal_match_check_event(vte, (GdkEvent *) event, &tag);
-//#else
-//	/* steal from tilda-0.09.6/src/tilda_terminal.c:743
-//	 * See if the terminal has matched the regular expression. */
-//
-//	GtkBorder border;
-//	term_get_border(term, &border);
-//	gint tag;
-//	gchar *match = vte_terminal_match_check(vte,
-//		(event->x-border.left)/vte_terminal_get_char_width(vte),
-//		(event->y-border.top)/vte_terminal_get_char_height(vte),
-//		&tag);
-//	return match;
-//#endif
 }
 
 static void
@@ -985,12 +927,8 @@ term_show_popup_menu(VteTerminal *vte, GdkEventButton *event, Term *term)
 		gtk_action_set_visible(action_open_url, term->matched_url != NULL);
 	}
 
-//#if GTK_CHECK_VERSION(3, 22, 0)
-	gtk_menu_popup_at_pointer(GTK_MENU(gtk_ui_manager_get_widget(manager, "/VTEMenu")), (GdkEvent *) event);
-//#else
-//	gtk_menu_popup(GTK_MENU(gtk_ui_manager_get_widget(manager, "/VTEMenu")),
-//		NULL, NULL, NULL, NULL, event->button, event->time);
-//#endif
+	gtk_menu_popup_at_pointer(GTK_MENU(gtk_ui_manager_get_widget(manager, "/VTEMenu")),
+		(GdkEvent *) event);
 }
 
 /* Handler for "cursor-moved" signal on VTE */
@@ -1072,33 +1010,27 @@ term_vte_commit(VteTerminal *vte, gchar *text, guint size, Term *term)
 static void
 term_settings_apply_to_term(LXTerminal *terminal, Term *term)
 {
-	Setting *setting = get_setting();
-//#if VTE_CHECK_VERSION (0, 38, 0)
+			
+	
+//	Setting *setting = get_setting();
+	Setting *setting = terminal->setting;
 	PangoFontDescription *font_desc;
-//#endif
+
 	/* Terminal properties. */
-//#if VTE_CHECK_VERSION (0, 38, 0)
 	font_desc = pango_font_description_from_string(setting->font_name);
 	vte_terminal_set_font(VTE_TERMINAL(term->vte), font_desc);
 	pango_font_description_free(font_desc);
 	vte_terminal_set_word_char_exceptions(VTE_TERMINAL(term->vte), setting->word_selection_characters);
-//#else
-//	vte_terminal_set_font_from_string(VTE_TERMINAL(term->vte), setting->font_name);
-//	vte_terminal_set_word_chars(VTE_TERMINAL(term->vte), setting->word_selection_characters);
-//#endif
 	vte_terminal_set_font_scale(VTE_TERMINAL(term->vte), terminal->scale);
 	vte_terminal_set_scrollback_lines(VTE_TERMINAL(term->vte), setting->scrollback);
 	vte_terminal_set_allow_bold(VTE_TERMINAL(term->vte), ! setting->disallow_bold);
-//#if VTE_CHECK_VERSION (0, 52, 0)
 	vte_terminal_set_bold_is_bright(VTE_TERMINAL(term->vte), setting->bold_bright);
-//#endif
 	vte_terminal_set_cursor_blink_mode(VTE_TERMINAL(term->vte), ((setting->cursor_blink) ? VTE_CURSOR_BLINK_ON : VTE_CURSOR_BLINK_OFF));
 	vte_terminal_set_cursor_shape(VTE_TERMINAL(term->vte), ((setting->cursor_underline) ? VTE_CURSOR_SHAPE_UNDERLINE : VTE_CURSOR_SHAPE_BLOCK));
 	vte_terminal_set_audible_bell(VTE_TERMINAL(term->vte), setting->audible_bell);
 	vte_terminal_set_mouse_autohide(VTE_TERMINAL(term->vte), setting->hide_pointer);
 
 	/* Background and foreground colors. */
-//#if !VTE_CHECK_VERSION (0, 38, 0)
 	if (terminal->rgba) {
 		/* vte_terminal_queue_background_update doesn't run without changing background. */
 		vte_terminal_set_color_background(VTE_TERMINAL(term->vte), &setting->foreground_color);
@@ -1109,13 +1041,8 @@ term_settings_apply_to_term(LXTerminal *terminal, Term *term)
 		vte_terminal_set_background_saturation(VTE_TERMINAL(term->vte), 1 - ((double) setting->background_alpha / 65535));
 		vte_terminal_set_background_tint_color(VTE_TERMINAL(term->vte), &setting->background_color);
 	}
-//#endif
 
-//#if VTE_CHECK_VERSION (0, 38, 0)
 	const GdkRGBA *palette_color = setting->palette_color;
-//#else
-//	const GdkColor *palette_color = setting->palette_color;
-//#endif
 	vte_terminal_set_colors(VTE_TERMINAL(term->vte), &setting->foreground_color, &setting->background_color, palette_color, 16);
 
 	/* Hide or show scrollbar. */
@@ -1149,82 +1076,44 @@ term_new(LXTerminal *terminal, const gchar *label, const gchar *pwd, gchar **env
 
 	/* Create a VTE and a vertical scrollbar, and place them inside a horizontal box. */
 	term->vte = vte_terminal_new();
-//#if GTK_CHECK_VERSION(3, 0, 0)
 	term->box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	term->scrollbar = gtk_scrollbar_new(GTK_ORIENTATION_VERTICAL, NULL);
-//#else
-//	term->box = gtk_hbox_new(FALSE, 0);
-//	term->scrollbar = gtk_vscrollbar_new(NULL);
-//#endif
 	gtk_box_pack_start(GTK_BOX(term->box), term->vte, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(term->box), term->scrollbar, FALSE, TRUE, 0);
 	gtk_widget_set_no_show_all(GTK_WIDGET(term->scrollbar), TRUE);
 
 	/* Set up the VTE. */
 	setlocale(LC_ALL, "");
-//#if VTE_CHECK_VERSION (0, 38, 0)
 	vte_terminal_set_encoding(VTE_TERMINAL(term->vte), nl_langinfo(CODESET), NULL);
-//#else
-//	vte_terminal_set_emulation(VTE_TERMINAL(term->vte), "xterm");
-//	vte_terminal_set_encoding(VTE_TERMINAL(term->vte), nl_langinfo(CODESET));
-//#endif
 	vte_terminal_set_backspace_binding(VTE_TERMINAL(term->vte), VTE_ERASE_ASCII_DELETE);
 	vte_terminal_set_delete_binding(VTE_TERMINAL(term->vte), VTE_ERASE_DELETE_SEQUENCE);
 
 	/* steal from tilda-0.09.6/src/tilda_terminal.c:145 */
 	/* Match URL's, etc. */
-//#if VTE_CHECK_VERSION (0, 46, 0)
 	VteRegex *dingus1 = vte_regex_new_for_match(DINGUS1, -1, PCRE2_UTF | PCRE2_NO_UTF_CHECK | PCRE2_UCP | PCRE2_MULTILINE, NULL);
 	VteRegex *dingus2 = vte_regex_new_for_match(DINGUS2, -1, PCRE2_UTF | PCRE2_NO_UTF_CHECK | PCRE2_UCP | PCRE2_MULTILINE, NULL);
 	gint ret = vte_terminal_match_add_regex(VTE_TERMINAL(term->vte), dingus1, 0);
 	vte_terminal_match_set_cursor_type(VTE_TERMINAL(term->vte), ret, GDK_HAND2);
 	ret = vte_terminal_match_add_regex(VTE_TERMINAL(term->vte), dingus2, 0);
 	vte_terminal_match_set_cursor_type(VTE_TERMINAL(term->vte), ret, GDK_HAND2);
-/*#else
-	GRegex *dingus1 = g_regex_new(DINGUS1, G_REGEX_OPTIMIZE, 0, NULL);
-	GRegex *dingus2 = g_regex_new(DINGUS2, G_REGEX_OPTIMIZE, 0, NULL);
-	gint ret = vte_terminal_match_add_gregex(VTE_TERMINAL(term->vte), dingus1, 0);
-	vte_terminal_match_set_cursor_type(VTE_TERMINAL(term->vte), ret, GDK_HAND2);
-	ret = vte_terminal_match_add_gregex(VTE_TERMINAL(term->vte), dingus2, 0);
-	vte_terminal_match_set_cursor_type(VTE_TERMINAL(term->vte), ret, GDK_HAND2);
-#endif
-*/
 	g_regex_unref(dingus1);
 	g_regex_unref(dingus2);
 
 	/* Create a horizontal box inside an event box as the toplevel for the tab label. */
 	term->tab = gtk_event_box_new();
 	gtk_widget_set_events(term->tab, GDK_BUTTON_PRESS_MASK);
-//#if GTK_CHECK_VERSION(3, 0, 0)
 	GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
-//#else
-//	GtkWidget *hbox = gtk_hbox_new(FALSE, 4);
-//#endif
 	gtk_container_add(GTK_CONTAINER(term->tab), hbox);
 
 	/* Create the Close button. */
 	term->close_button = gtk_button_new();
 	gtk_button_set_relief(GTK_BUTTON(term->close_button), GTK_RELIEF_NONE);
 	gtk_button_set_focus_on_click(GTK_BUTTON(term->close_button), FALSE);
-//#if GTK_CHECK_VERSION(3, 0, 0)
 	gtk_container_add(GTK_CONTAINER(term->close_button), gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU));
-//#else
-//	gtk_container_add(GTK_CONTAINER(term->close_button), gtk_image_new_from_stock(GTK_STOCK_CLOSE, GTK_ICON_SIZE_MENU));
-//#endif
 
-	/* Make the button as small as possible. */
-/*
-#if GTK_CHECK_VERSION(3, 0, 0)
-#else
-	GtkRcStyle *rcstyle = gtk_rc_style_new();
-	rcstyle->xthickness = rcstyle->ythickness = 0;
-	gtk_widget_modify_style(term->close_button, rcstyle);
-	g_object_ref(rcstyle);
-#endif
-*/
 	/* Come up with default label and window title */
 	if (exec == NULL) {
-		vte_terminal_feed(VTE_TERMINAL(term->vte), "\033]0;LXTerminal\007", -1);
+		vte_terminal_feed(VTE_TERMINAL(term->vte), "\033]0;LXtermc\007", -1);
 	} else {
 		/* Set title to the command being called */
 		gchar *cmd = g_path_get_basename((exec[1][0] == '-' && exec[2] != NULL) ? exec[3] : exec[1]);
@@ -1246,24 +1135,15 @@ term_new(LXTerminal *terminal, const gchar *label, const gchar *pwd, gchar **env
 	term->label = gtk_label_new((label != NULL) ? label : vte_terminal_get_window_title(VTE_TERMINAL(term->vte)));
 	gtk_widget_set_size_request(GTK_WIDGET(term->label), 100, -1);
 	gtk_label_set_ellipsize(GTK_LABEL(term->label), PANGO_ELLIPSIZE_END);
-//#if GTK_CHECK_VERSION(3, 0, 0)
 	gtk_widget_set_valign(term->label, GTK_ALIGN_CENTER);
-/*#else
-	gtk_misc_set_alignment(GTK_MISC(term->label), 0.0, 0.5);
-	gtk_misc_set_padding(GTK_MISC(term->label), 0, 0);
-#endif
-*/
+
 	/* Pack everything and show the widget. */
 	gtk_box_pack_start(GTK_BOX(hbox), term->label, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(hbox), term->close_button, FALSE, FALSE, 0);
 	gtk_widget_show_all(term->tab);
 
 	/* Set up scrollbar. */
-//#if VTE_CHECK_VERSION (0, 38, 0)
 	gtk_range_set_adjustment(GTK_RANGE(term->scrollbar), gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(term->vte)));
-//#else
-//	gtk_range_set_adjustment(GTK_RANGE(term->scrollbar), vte_terminal_get_adjustment(VTE_TERMINAL(term->vte)));
-//#endif
 
 	/* Fork the process that will have the VTE as its controlling terminal. */
 	if (exec == NULL) {
@@ -1273,7 +1153,6 @@ term_new(LXTerminal *terminal, const gchar *label, const gchar *pwd, gchar **env
 		exec[2] = NULL;
 	}
 
-//#if VTE_CHECK_VERSION (0, 38, 0)
 	vte_terminal_spawn_sync(
 		VTE_TERMINAL(term->vte),
 		VTE_PTY_NO_LASTLOG | VTE_PTY_NO_UTMP | VTE_PTY_NO_WTMP,
@@ -1287,20 +1166,6 @@ term_new(LXTerminal *terminal, const gchar *label, const gchar *pwd, gchar **env
 		NULL,
 		NULL
 	);
-/*#else
-	vte_terminal_fork_command_full(
-		VTE_TERMINAL(term->vte),
-		VTE_PTY_NO_LASTLOG | VTE_PTY_NO_UTMP | VTE_PTY_NO_WTMP,
-		pwd,
-		exec,
-		env,
-		G_SPAWN_SEARCH_PATH | G_SPAWN_FILE_AND_ARGV_ZERO,
-		NULL,
-		NULL,
-		&term->pid,
-		NULL
-	);
-#endif*/
 	g_strfreev(exec);
 
 	/* Connect signals. */
@@ -1340,7 +1205,7 @@ term_menubar_initialize(LXTerminal *terminal)
 	terminal->action_group = gtk_action_group_new("MenuBar");
 	gtk_action_group_set_translation_domain(terminal->action_group, GETTEXT_PACKAGE);
 	/* modify accelerators by setting */
-	term_initialize_menu_shortcuts(get_setting());
+	term_initialize_menu_shortcuts(terminal->setting);
 	gtk_action_group_add_actions(terminal->action_group, menu_items, MENUBAR_MENUITEM_COUNT, terminal);
 	gtk_ui_manager_insert_action_group(manager, terminal->action_group, 0);
 
@@ -1365,21 +1230,12 @@ term_menu_accelerator_update(LXTerminal *terminal)
 		g_object_get(G_OBJECT(gtk_settings_get_default()), "gtk-menu-bar-accel", &saved_menu_accelerator, NULL);
 
 	/* If F10 is disabled, set the accelerator to a key combination that is not F10 and unguessable. */
-//#if GTK_CHECK_VERSION(3, 0, 0)
 	g_object_set(
 		gtk_settings_get_default(),
 		"gtk-menu-bar-accel",
-		((get_setting()->disable_f10) ? "<Shift><Control><Mod1><Mod2><Mod3><Mod4><Mod5>F10" : saved_menu_accelerator),
+		((terminal->setting->disable_f10) ? "<Shift><Control><Mod1><Mod2><Mod3><Mod4><Mod5>F10" : saved_menu_accelerator),
 		NULL
 	);
-/*#else
-	gtk_settings_set_string_property(
-		gtk_settings_get_default(),
-		"gtk-menu-bar-accel",
-		((get_setting()->disable_f10) ? "<Shift><Control><Mod1><Mod2><Mod3><Mod4><Mod5>F10" : saved_menu_accelerator),
-		"lxterminal"
-	);
-#endif*/
 }
 
 /* Process the argument vector into the CommandArguments structure.
@@ -1423,6 +1279,7 @@ lxtermc_args(gint argc, gchar **argv, CommandArguments *arguments)
 			arguments->config = &argument[9];
 			printf("lxtermc, --config='%s'\n", arguments->config);
 		} else if ((strcmp, "--config") == 0 || (strcmp(argument, "-c") == 0)) {
+			/* --config <fname> */
 			argc--;
 			argv_cursor++;
 			arguments->config = *argv_cursor;
@@ -1511,8 +1368,9 @@ lxtermc_args(gint argc, gchar **argv, CommandArguments *arguments)
 	return TRUE;
 }
 
-/* Initialize a new LXTerminal.
- * This is a toplevel window that may contain tabs, each of which will contain a VTE controlled by a process. */
+/* Initialize a new LXtermc,
+ * This is a toplevel window that may contain tabs, each of which will contain a VTE
+ * controlled by a process. */
 LXTerminal *
 lxtermc_init(LXTermWindow *lxtermwin, CommandArguments *arguments)
 {
@@ -1524,20 +1382,71 @@ lxtermc_init(LXTermWindow *lxtermwin, CommandArguments *arguments)
 	g_ptr_array_add(lxtermwin->windows, terminal);
 	terminal->index = terminal->parent->windows->len-1;
 	terminal->scale = 1.0;
-	Setting *setting = get_setting();
+
+		
+						
+			
+
+// lxtermwin->setting is NULL for root/controller, non NULL for client, because:
+// client -> lxtermc_init() is then called from (unix_socket) handle_request()
+// with an initialized LXTermWindow (pointer) as argument
+
+/* not this, eh???*/
+//	Setting *setting = get_setting();
+// ste - here is where config file location is to be determined
+
+	gchar *fn = LXTERMC_NAME"_init(): ";
+
+	/* find out what config to use */
+	gchar *cmdline_config = arguments->config;
+	gchar *user_config = NULL;
+
+	/* command line config - a special case */
+	if (cmdline_config && !g_file_test(cmdline_config, G_FILE_TEST_IS_REGULAR)) {
+		fprintf(sdderr, "%s command line config ignored, as the file is not regular!\n"
+			" -> %s\n", fn, cmdline_config);
+		cmdline_config = NULL;
+	}
+
+	/* user config - should always exist, unless cmdline_config */
+	if (!cmdline_config) {
+		gchar *dir = g_build_filename(g_get_user_config_dir(), LXTERMC_NAME, NULL);
+		user_config = g_build_filename(dir, LXTERMC_CONF, NULL);
+		if (g_mkdir_with_parents(dir, S_IRUSR | S_IWUSR | S_IXUSR) < 0) {
+			fprintf(stderr, "%s could not create user config dir %s\n",
+				fn, g_strerror(errno));
+			g_free(user_config);
+			user_config = NULL;
+		} else if (!g_file_test(user_config, G_FILE_TEST_EXIST)) {
+			gchar *system_config = g_build_filename(PACKAGE_DATA_DIR, LXTERMC_NAME,
+				LXTERMC_CONFIG);
+			if (!g_file_test(system_config, G_FILE_TEST_IS_REGULAR)) {
+				fprintf(sdderr, "%s system config does not exist, "
+					"using default values!\n", fn);
+			} else if (!g_file_copy(system_config, user_config,
+				G_FILE_COPY_NONE, NULL, NULL, NULL, NULL) {
+				fprintf(stderr, "%s failed to copy system config"
+					"to user config dir\n", fn);
+				g_free(user_config);
+				user_config = NULL;
+			}
+			g_free(system_config);
+			system_config = NULL;
+		}
+		g_free(dir);
+	}
+
+	terminal->setting = (cmdline_config) ? load_setting(cmdline_config) : lxtermwin->setting;
+	if (!terminal->setting && user_config) terminal->setting = load_setting(user_config);
 
 	/* Create toplevel window. */
 	terminal->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
 	/* Try to get an RGBA visual (colormap) and assign it to the new window. */
-//#if GTK_CHECK_VERSION (2, 90, 8)
-		GdkVisual *visual = gdk_screen_get_rgba_visual(gtk_widget_get_screen(GTK_WIDGET(terminal->window)));
-		if (visual != NULL) gtk_widget_set_visual(terminal->window, visual);
-/*#else
-		GdkColormap *colormap = gdk_screen_get_rgba_colormap(gtk_widget_get_screen(GTK_WIDGET(terminal->window)));
-		if (colormap != NULL) gtk_widget_set_colormap(terminal->window, colormap);
-#endif
-*/
+	GdkVisual *visual = gdk_screen_get_rgba_visual(
+		gtk_widget_get_screen(GTK_WIDGET(terminal->window)));
+	if (visual != NULL) gtk_widget_set_visual(terminal->window, visual);
+
 	/* Set window icon. */
 	if (gtk_icon_theme_has_icon(gtk_icon_theme_get_default(), "lxterminal")) {
 		gtk_window_set_icon_name(GTK_WINDOW(terminal->window), "lxterminal");
@@ -1548,11 +1457,7 @@ lxtermc_init(LXTermWindow *lxtermwin, CommandArguments *arguments)
 	g_object_weak_ref(G_OBJECT(terminal->window), (GWeakNotify) term_window_exit, terminal);
 
 	/* Create a vertical box as the child of the toplevel window. */
-//#if GTK_CHECK_VERSION(3, 0, 0)
 	terminal->box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 1);
-//#else
-//	terminal->box = gtk_vbox_new(FALSE, 1);
-//#endif
 	gtk_container_add(GTK_CONTAINER(terminal->window), terminal->box);
 
 	/* Create the menu bar as the child of the vertical box. */
@@ -1689,17 +1594,17 @@ term_settings_apply(LXTerminal *terminal)
 	terminal->rgba = gtk_widget_is_composited(terminal->window);
 
 	/* Update tab position. */
-	terminal->tab_position = term_tab_get_position_id(get_setting()->tab_position);
+	terminal->tab_position = term_tab_get_position_id(terminal->setting->tab_position);
 	term_tab_set_position(terminal->notebook, terminal->tab_position);
 
 	/* Update menu accelerators. */
 	term_menu_accelerator_update(terminal);
 
 	/* disable mnemonics if <ALT>n is diabled */
-	g_object_set(gtk_settings_get_default(), "gtk-enable-mnemonics", !get_setting()->disable_alt, NULL);
+	g_object_set(gtk_settings_get_default(), "gtk-enable-mnemonics", !terminal->setting->disable_alt, NULL);
 
 	/* Hide or show menubar. */
-	if (get_setting()->hide_menu_bar) {
+	if (terminal->setting->hide_menu_bar) {
 		gtk_widget_hide(terminal->menu);
 	} else {
 		gtk_widget_show(terminal->menu);
@@ -1727,10 +1632,10 @@ void
 term_settings_apply_to_all(LXTerminal *terminal)
 {
 	/* Recreate accelerators, may be changed. */
-	term_update_menu_shortcuts(get_setting());
+	term_update_menu_shortcuts(terminal->setting);
 	/* Apply settings to all open windows. */
-	g_ptr_array_foreach(terminal->parent->windows, (GFunc) term_settings_apply, get_setting());
-	get_setting()->geometry_change = FALSE;
+	g_ptr_array_foreach(terminal->parent->windows, (GFunc) term_settings_apply, terminal->setting);
+	terminal->setting->geometry_change = FALSE;
 }
 
 /* Update terminal menu shortcuts. */
@@ -1811,23 +1716,23 @@ main(gint argc, gchar **argv)
 	/* Initialize impure storage. */
 	LXTermWindow *lxtermwin = g_slice_new0(LXTermWindow);
 
-	/* Initialize socket.  If we were able to get another LXTerminal to manage the window, exit. */
-			
-	
-	/*philostone - change ?? or elsewhere - another manager only for equal configs ... */
-	if (!arguments.no_remote && !lxterminal_socket_initialize(lxtermwin, argc, argv)) return 0;
+	/* Initialize socket.  If we get another lxtermc to manage the window, exit. */
+	if (!arguments.no_remote && !lxtermc_socket_init(lxtermwin, argc, argv)) return 0;
 
-	/* Load user preferences. */
+	/* Load command line, user or system preferences */
 			
 		
-// TODO: use macros (where ???) for filenames
+
+/* ste - this must be in lxtermc_init and/or the socket handler above !!!! */
+/*
 	gchar *fn = LXTERMC_NAME" - main(): ";
 	gchar *dir = g_build_filename(g_get_user_config_dir(), LXTERMC_NAME, NULL);
 	g_mkdir_with_parents(dir, S_IRUSR | S_IWUSR | S_IXUSR);
 	gchar *user_config = g_build_filename(dir, LXTERMC_CONF, NULL);
 	g_free(dir);
-			
+*/			
 		
+/*
 // TODO check that file exists ???
 	gchar *system_config = g_strdup(PACKAGE_DATA_DIR"/"LXTERMC_NAME"/"LXTERMC_CONFIG);
 	printf("%s - load config settings, in priority order, if existing\n", fn);
@@ -1857,10 +1762,12 @@ main(gint argc, gchar **argv)
 
 	gchar *config = (arguments->config) ?: user_config;
 	if ( argumen
+*/
 			
 			
 //TODO differ between root window and subsequent ones... ???????????
-	load_setting();
+// ste - in lxtermc_init (or secket handler) ?????????
+//	load_setting();
 	
 	/* Finish initializing the impure area and start the first LXTerminal. */
 	lxtermwin->windows = g_ptr_array_new();

@@ -18,9 +18,9 @@
  *  MA 02110-1301, USA.
  */
 
-#ifndef LXTERMINAL_UNIXSOCKET_H
-#define LXTERMINAL_UNIXSOCKET_H
+#ifndef LXTERMC_UNIXSOCKET_H
+#define LXTERMC_UNIXSOCKET_H
 
-extern gboolean lxterminal_socket_initialize(LXTermWindow *lxtermwin, gint argc, gchar **argv);
+extern gboolean lxtermc_socket_init(LXTermWindow *lxtermwin, gint argc, gchar **argv);
 
-#endif
+#endif /* LXTERMC_UNIXSOCKET_H */

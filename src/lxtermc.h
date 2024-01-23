@@ -18,6 +18,11 @@
  *  MA 02110-1301, USA.
  */
 
+/*
+ * philostone config model:
+ * 
+ */
+
 #ifndef LXTERMC_H
 #define LXTERMC_H
 
@@ -47,8 +52,7 @@ typedef struct _lxterminal {
 	GtkAccelGroup *accel_group;		/* Accelerator group for accelerators on this window */
 	GtkWidget *notebook;			/* Notebook, child of vertical box */
 	GPtrArray *terms;			/* Array of pointers to Term structures */
-//	Setting * setting;			/* A copy of parent->setting */
-	Setting *setting;			/* Optionally unique setting for this window, NULL if same as top level */
+	Setting *setting;			/* Optionally unique setting for this window, copy of parent->setting if same as top level */
 	GdkGeometry geometry;			/* Geometry hints (see XGetWMNormalHints) */
 	GdkWindowHints geometry_mask;		/* Mask of valid data in geometry hints */
 	gboolean rgba;				/* True if colormap is RGBA */
@@ -96,9 +100,7 @@ typedef struct _command_arguments {
 	gboolean no_remote;
 } CommandArguments;
 
-//extern gboolean lxtermintal_process_arguments(gint argc, gchar **argv, CommandArguments *arguments);
 extern gboolean lxtermc_args(gint argc, gchar **argv, CommandArguments *arguments);
-//extern LXTerminal *lxterminal_initialize(LXTermWindow *lxtermwin, CommandArguments *arguments);
 extern LXTerminal *lxtermc_init(LXTermWindow *lxtermwin, CommandArguments *arguments);
 extern void terminal_settings_apply_to_all(LXTerminal *terminal);
 
