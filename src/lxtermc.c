@@ -644,6 +644,7 @@ term_move_tab_right_activate_event(GtkAction *action, LXTerminal *terminal)
 }
 
 /* Make scale code uniform across VTE versions */
+/*
 static void
 vte_terminal_set_font_scale(VteTerminal *vte, gdouble scale)
 {
@@ -659,6 +660,7 @@ vte_terminal_set_font_scale(VteTerminal *vte, gdouble scale)
 	vte_terminal_set_font(vte, new_font_desc);
 	pango_font_description_free(new_font_desc);
 }
+*/
 
 /* Helper for terminal zoom in/out. */
 static void
@@ -1512,7 +1514,7 @@ lxtermc_init(LXTermWindow *lxtermwin, CommandArguments *arguments)
 	if ((geometry_bitmask & WidthValue) && (geometry_bitmask & HeightValue)) {
 		vte_terminal_set_size(VTE_TERMINAL(term->vte), arguments->geometry_columns, arguments->geometry_rows);
 	} else {
-		vte_terminal_set_size(VTE_TERMINAL(term->vte), setting->geometry_columns, setting->geometry_rows);
+		vte_terminal_set_size(VTE_TERMINAL(term->vte), terminal->setting->geometry_columns, setting->geometry_rows);
 	}
 
 	/* Add the first terminal to the notebook and the data structures. */
