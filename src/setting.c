@@ -275,10 +275,7 @@ copy_setting(Setting *setting)
 void
 free_setting(Setting **setting)
 {
-			
-//TODO: what happenes to arg ???????????
-
-	Setting *setting;
+	Setting *_setting;
 	g_return_if_fail(setting != NULL && *setting != NULL);
 
 	_setting = *setting;

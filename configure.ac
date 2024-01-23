@@ -1,5 +1,5 @@
 AC_PREREQ([2.72])
-AC_INIT([lxtermc],[0.0.1],[http://github.com/philostone/lxtermc])
+AC_INIT([lxtermc],[0.0.2],[http://github.com/philostone/lxtermc])
 AM_INIT_AUTOMAKE([foreign])
 
 AC_CONFIG_HEADERS([config.h])

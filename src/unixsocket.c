@@ -250,7 +250,7 @@ handle_request(GIOChannel *gio, GIOCondition condition, ClientInfo *info) {
 		/* Parse arguments.
 		 * Initialize a new LXTerminal and create a new window. */
 		CommandArguments arguments;
-		lxterminal_process_arguments(argc, argv, &arguments);
+		lxtermc_process_arguments(argc, argv, &arguments);
 		g_free(argv);
 
 		/* Make sure working directory matches that of the client process */

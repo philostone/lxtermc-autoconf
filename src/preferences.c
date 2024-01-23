@@ -37,6 +37,8 @@ static void
 preferences_dialog_font_set_event(GtkFontButton *widget, Setting *setting)
 {
 	g_free(setting->font_name);
+			
+// TODO: use gtk_font_chooser_get_font instead
 	setting->font_name = g_strdup(gtk_font_button_get_font_name(widget));
 	setting->geometry_change = TRUE;	/* Force the terminals to resize */
 }
@@ -226,7 +228,7 @@ accel_set_label(const gchar *name, GtkWidget *w)
 void
 terminal_preferences_dialog(GtkAction *action, LXTerminal *terminal)
 {
-	Setting * setting = copy_setting(get_setting());
+	Setting *setting = copy_setting(terminal->setting);
 
 	builder = gtk_builder_new();
 	if (!gtk_builder_add_from_file(builder,
@@ -410,8 +412,11 @@ terminal_preferences_dialog(GtkAction *action, LXTerminal *terminal)
 	/* Dismiss dialog. */
 	gtk_widget_destroy(GTK_WIDGET(dialog));
 	if (result == GTK_RESPONSE_OK) {
+			
+// TODO save what setting ???
+// TODO apply to all ???
 		set_setting(setting);
-		save_setting();
+		save_setting(setting);
 		terminal_settings_apply_to_all(terminal);
 	} else {
 		free_setting(&setting);

@@ -47,61 +47,61 @@
 #include "unixsocket.h"
 
 /* Utilities. */
-static void term_get_border(Term *term, GtkBorder *border);
-static void term_save_size(LXTerminal *terminal);
-static void term_tab_set_position(GtkWidget *notebook, gint tab_position);
-static gchar *term_get_current_dir(LXTerminal *terminal);
-static const gchar *term_get_preferred_shell();
+static void		term_get_border(Term *term, GtkBorder *border);
+static void		term_save_size(LXTerminal *terminal);
+static void		term_tab_set_position(GtkWidget *notebook, gint tab_position);
+static gchar		*term_get_current_dir(LXTerminal *terminal);
+static const gchar	*term_get_preferred_shell();
 
 /* Menu and accelerator event handlers. */
-static void term_initialize_switch_tab_accelerator(Term *term);
-static void term_update_alt(LXTerminal *terminal);
-static gboolean term_switch_tab_accelerator(Term *term);
-static void term_new_window_activate_event(GtkAction *action, LXTerminal *terminal);
-static void term_new_tab_activate_event(GtkAction *action, LXTerminal *terminal);
-static void term_close_tab_activate_event(GtkAction *action, LXTerminal *terminal);
-static void term_close_window_activate_event(GtkAction *action, LXTerminal *terminal);
-static void term_open_url_activate_event(GtkAction *action, LXTerminal *terminal);
-static void term_copy_url_activate_event(GtkAction *action, LXTerminal *terminal);
-static void term_copy_activate_event(GtkAction *action, LXTerminal *terminal);
-static void term_paste_activate_event(GtkAction *action, LXTerminal *terminal);
-static void term_clear_activate_event(GtkAction *action, LXTerminal *terminal);
-static void term_name_tab_response_event(GtkWidget *dialog, gint response, Term *term);
-static void term_name_tab_activate_event(GtkAction *action, LXTerminal *terminal);
-static void term_previous_tab_activate_event(GtkAction *action, LXTerminal *terminal);
-static void term_next_tab_activate_event(GtkAction *action, LXTerminal *terminal);
-static void term_move_tab_execute(LXTerminal *terminal, gint direction);
-static void term_move_tab_left_activate_event(GtkAction *action, LXTerminal *terminal);
-static void term_move_tab_right_activate_event(GtkAction *action, LXTerminal *terminal);
-static void term_zoom(LXTerminal *terminal);
-static gboolean term_zoom_in_activate_event(GtkAction *action, LXTerminal *terminal);
-static gboolean term_zoom_out_activate_event(GtkAction *action, LXTerminal *terminal);
-static gboolean term_zoom_reset_activate_event(GtkAction *action, LXTerminal *terminal);
-static void term_about_activate_event(GtkAction *action, LXTerminal *terminal);
+static void		term_initialize_switch_tab_accelerator(Term *term);
+static void		term_update_alt(LXTerminal *terminal);
+static gboolean		term_switch_tab_accelerator(Term *term);
+static void		term_new_window_activate_event(GtkAction *action, LXTerminal *terminal);
+static void		term_new_tab_activate_event(GtkAction *action, LXTerminal *terminal);
+static void		term_close_tab_activate_event(GtkAction *action, LXTerminal *terminal);
+static void		term_close_window_activate_event(GtkAction *action, LXTerminal *terminal);
+static void		term_open_url_activate_event(GtkAction *action, LXTerminal *terminal);
+static void		term_copy_url_activate_event(GtkAction *action, LXTerminal *terminal);
+static void		term_copy_activate_event(GtkAction *action, LXTerminal *terminal);
+static void		term_paste_activate_event(GtkAction *action, LXTerminal *terminal);
+static void		term_clear_activate_event(GtkAction *action, LXTerminal *terminal);
+static void		term_name_tab_response_event(GtkWidget *dialog, gint response, Term *term);
+static void		term_name_tab_activate_event(GtkAction *action, LXTerminal *terminal);
+static void		term_previous_tab_activate_event(GtkAction *action, LXTerminal *terminal);
+static void		term_next_tab_activate_event(GtkAction *action, LXTerminal *terminal);
+static void		term_move_tab_execute(LXTerminal *terminal, gint direction);
+static void		term_move_tab_left_activate_event(GtkAction *action, LXTerminal *terminal);
+static void		term_move_tab_right_activate_event(GtkAction *action, LXTerminal *terminal);
+static void		term_zoom(LXTerminal *terminal);
+static gboolean		term_zoom_in_activate_event(GtkAction *action, LXTerminal *terminal);
+static gboolean		term_zoom_out_activate_event(GtkAction *action, LXTerminal *terminal);
+static gboolean		term_zoom_reset_activate_event(GtkAction *action, LXTerminal *terminal);
+static void		term_about_activate_event(GtkAction *action, LXTerminal *terminal);
 
 /* Window creation, destruction, and control. */
-static void term_switch_page_event(GtkNotebook *notebook, GtkWidget *page, guint num, LXTerminal *terminal);
-static void term_vte_size_allocate_event(GtkWidget *widget, GtkAllocation *allocation, Term *term);
-static void term_window_title_changed_event(GtkWidget *vte, Term *term);
-static gboolean term_close_window_confirmation_event(GtkWidget *widget, GdkEventButton *event, LXTerminal *terminal);
-static gboolean term_close_window_confirmation_dialog(LXTerminal *terminal);
-static void term_window_exit(LXTerminal *terminal, GObject *where_the_object_was);
-static void term_child_exited_event(VteTerminal *vte, gint status, Term *term);
-static void term_close_button_event(GtkButton *button, Term *term);
-static gboolean term_tab_button_press_event(GtkWidget *widget, GdkEventButton *event, Term *term);
-static void term_vte_cursor_moved_event(VteTerminal *vte, Term *term);
-static void term_vte_visual_bell(VteTerminal *vte, Term *term);
-static gboolean term_vte_button_press_event(VteTerminal *vte, GdkEventButton *event, Term *term);
-static void term_settings_apply_to_term(LXTerminal *terminal, Term *term);
-static Term *term_new(LXTerminal *terminal, const gchar *label, const gchar *pwd, gchar **env, gchar **exec);
-static void term_set_geometry_hints(Term *term, GdkGeometry *geometry);
-static void term_new_tab(LXTerminal *terminal, const gchar *label);
-static void term_free(Term *term);
-static void term_menubar_initialize(LXTerminal *terminal);
-static void term_menu_accelerator_update(LXTerminal *terminal);
-static void term_settings_apply(LXTerminal *terminal);
-static void term_update_menu_shortcuts(Setting *setting);
-static void term_initialize_menu_shortcuts(Setting *setting);
+static void		term_switch_page_event(GtkNotebook *notebook, GtkWidget *page, guint num, LXTerminal *terminal);
+static void		term_vte_size_allocate_event(GtkWidget *widget, GtkAllocation *allocation, Term *term);
+static void		term_window_title_changed_event(GtkWidget *vte, Term *term);
+static gboolean		term_close_window_confirmation_event(GtkWidget *widget, GdkEventButton *event, LXTerminal *terminal);
+static gboolean		term_close_window_confirmation_dialog(LXTerminal *terminal);
+static void		term_window_exit(LXTerminal *terminal, GObject *where_the_object_was);
+static void		term_child_exited_event(VteTerminal *vte, gint status, Term *term);
+static void		term_close_button_event(GtkButton *button, Term *term);
+static gboolean		term_tab_button_press_event(GtkWidget *widget, GdkEventButton *event, Term *term);
+static void		term_vte_cursor_moved_event(VteTerminal *vte, Term *term);
+static void		term_vte_visual_bell(VteTerminal *vte, Term *term);
+static gboolean		term_vte_button_press_event(VteTerminal *vte, GdkEventButton *event, Term *term);
+static void		term_settings_apply_to_term(LXTerminal *terminal, Term *term);
+static Term		*term_new(LXTerminal *terminal, const gchar *label, const gchar *pwd, gchar **env, gchar **exec);
+static void		term_set_geometry_hints(Term *term, GdkGeometry *geometry);
+static void		term_new_tab(LXTerminal *terminal, const gchar *label);
+static void		term_free(Term *term);
+static void		term_menubar_initialize(LXTerminal *terminal);
+static void		term_menu_accelerator_update(LXTerminal *terminal);
+static void		term_settings_apply(LXTerminal *terminal);
+static void		term_update_menu_shortcuts(Setting *setting);
+static void		term_initialize_menu_shortcuts(Setting *setting);
 
 /* Menu accelerator saved when the user disables it. */
 static char *saved_menu_accelerator = NULL;
@@ -142,7 +142,7 @@ static GtkActionEntry menu_items[] =
 /* 14 */	{ "Edit_ZoomOut", "zoom-out", N_("Zoom O_ut"), ZOOM_OUT_ACCEL_DEF, "Zoom Out", G_CALLBACK(term_zoom_out_activate_event) },
 /* 15 */	{ "Edit_ZoomReset", "zoom-fit-best", N_("Zoom _Reset"), ZOOM_RESET_ACCEL_DEF, "Zoom Reset", G_CALLBACK(term_zoom_reset_activate_event) },
 /* 16 */	{ "Edit_Sep2", NULL, "Sep" },
-/* 17 */	{ "Edit_Preferences", "system-run", N_("Preference_s"), NULL, "Preferences", G_CALLBACK(term_preferences_dialog) },
+/* 17 */	{ "Edit_Preferences", "system-run", N_("Preference_s"), NULL, "Preferences", G_CALLBACK(terminal_preferences_dialog) },
 /* 18 */	{ "Tabs_NameTab", "dialog-information", N_("Na_me Tab"), NAME_TAB_ACCEL_DEF, "Name Tab", G_CALLBACK(term_name_tab_activate_event) },
 /* 19 */	{ "Tabs_PreviousTab", "go-previous", N_("Pre_vious Tab"), PREVIOUS_TAB_ACCEL_DEF, "Previous Tab", G_CALLBACK(term_previous_tab_activate_event) },
 /* 20 */	{ "Tabs_NextTab", "go-next", N_("Ne_xt Tab"), NEXT_TAB_ACCEL_DEF, "Next Tab", G_CALLBACK(term_next_tab_activate_event) },
@@ -165,7 +165,7 @@ static GtkActionEntry vte_menu_items[] =
 	{ "Paste", "edit-paste", N_("_Paste"), NULL, "Paste", G_CALLBACK(term_paste_activate_event) },
 	{ "Clear", NULL, N_("Cl_ear scrollback"), NULL, "Clear scrollback", G_CALLBACK(term_clear_activate_event) },
 	{ "Sep2", NULL, "Sep" },
-	{ "Preferences", "system-run", N_("Preference_s"), NULL, "Preferences", G_CALLBACK(term_preferences_dialog) },
+	{ "Preferences", "system-run", N_("Preference_s"), NULL, "Preferences", G_CALLBACK(terminal_preferences_dialog) },
 	{ "Sep3", NULL, "Sep" },
 	{ "NameTab", "dialog-information", N_("Na_me Tab"), NULL, "Name Tab", G_CALLBACK(term_name_tab_activate_event) },
 	{ "PreviousTab", "go-previous", N_("Pre_vious Tab"), NULL, "Previous Tab", G_CALLBACK(term_previous_tab_activate_event) },
@@ -333,7 +333,7 @@ term_new_window_activate_event(GtkAction *action, LXTerminal *terminal)
 	CommandArguments arguments;
 	memset(&arguments, 0, sizeof(arguments));
 	arguments.working_directory = term_get_current_dir(terminal);
-	lxterm_initialize(terminal->parent, &arguments);
+	lxtermc_init(terminal->parent, &arguments);
 	g_free(arguments.working_directory);
 }
 
@@ -1031,19 +1031,22 @@ term_settings_apply_to_term(LXTerminal *terminal, Term *term)
 	vte_terminal_set_mouse_autohide(VTE_TERMINAL(term->vte), setting->hide_pointer);
 
 	/* Background and foreground colors. */
+			
+// TODO check transparency
 	if (terminal->rgba) {
 		/* vte_terminal_queue_background_update doesn't run without changing background. */
 		vte_terminal_set_color_background(VTE_TERMINAL(term->vte), &setting->foreground_color);
 		vte_terminal_set_background_transparent(VTE_TERMINAL(term->vte), FALSE);
-		vte_terminal_set_opacity(VTE_TERMINAL(term->vte), setting->background_alpha);
+//		vte_terminal_set_opacity(VTE_TERMINAL(term->vte), setting->background_alpha);
 	} else {
-		vte_terminal_set_background_transparent(VTE_TERMINAL(term->vte), setting->background_alpha == 65535 ? FALSE : TRUE);
-		vte_terminal_set_background_saturation(VTE_TERMINAL(term->vte), 1 - ((double) setting->background_alpha / 65535));
+//		vte_terminal_set_background_transparent(VTE_TERMINAL(term->vte), setting->background_alpha == 65535 ? FALSE : TRUE);
+//		vte_terminal_set_background_saturation(VTE_TERMINAL(term->vte), 1 - ((double) setting->background_alpha / 65535));
 		vte_terminal_set_background_tint_color(VTE_TERMINAL(term->vte), &setting->background_color);
 	}
 
 	const GdkRGBA *palette_color = setting->palette_color;
-	vte_terminal_set_colors(VTE_TERMINAL(term->vte), &setting->foreground_color, &setting->background_color, palette_color, 16);
+	vte_terminal_set_colors(VTE_TERMINAL(term->vte), &setting->foreground_color, &setting->background_color,
+		palette_color, 16);
 
 	/* Hide or show scrollbar. */
 	if (setting->hide_scroll_bar) {
@@ -1403,7 +1406,7 @@ lxtermc_init(LXTermWindow *lxtermwin, CommandArguments *arguments)
 
 	/* command line config - a special case */
 	if (cmdline_config && !g_file_test(cmdline_config, G_FILE_TEST_IS_REGULAR)) {
-		fprintf(sdderr, "%s command line config ignored, as the file is not regular!\n"
+		fprintf(stderr, "%s command line config ignored, as the file is not regular!\n"
 			" -> %s\n", fn, cmdline_config);
 		cmdline_config = NULL;
 	}
@@ -1411,20 +1414,24 @@ lxtermc_init(LXTermWindow *lxtermwin, CommandArguments *arguments)
 	/* user config - should always exist, unless cmdline_config */
 	if (!cmdline_config) {
 		gchar *dir = g_build_filename(g_get_user_config_dir(), LXTERMC_NAME, NULL);
-		user_config = g_build_filename(dir, LXTERMC_CONF, NULL);
+		user_config = g_build_filename(dir, LXTERMC_CONFIG, NULL);
 		if (g_mkdir_with_parents(dir, S_IRUSR | S_IWUSR | S_IXUSR) < 0) {
 			fprintf(stderr, "%s could not create user config dir %s\n",
 				fn, g_strerror(errno));
 			g_free(user_config);
 			user_config = NULL;
-		} else if (!g_file_test(user_config, G_FILE_TEST_EXIST)) {
+		} else if (!g_file_test(user_config, G_FILE_TEST_EXISTS)) {
 			gchar *system_config = g_build_filename(PACKAGE_DATA_DIR, LXTERMC_NAME,
 				LXTERMC_CONFIG);
 			if (!g_file_test(system_config, G_FILE_TEST_IS_REGULAR)) {
 				fprintf(sdderr, "%s system config does not exist, "
 					"using default values!\n", fn);
+		
+	
+// TODO GFile * instead of filenames !!!!!
+
 			} else if (!g_file_copy(system_config, user_config,
-				G_FILE_COPY_NONE, NULL, NULL, NULL, NULL) {
+				G_FILE_COPY_NONE, NULL, NULL, NULL, NULL)) {
 				fprintf(stderr, "%s failed to copy system config"
 					"to user config dir\n", fn);
 				g_free(user_config);
@@ -1463,7 +1470,7 @@ lxtermc_init(LXTermWindow *lxtermwin, CommandArguments *arguments)
 	/* Create the menu bar as the child of the vertical box. */
 	term_menubar_initialize(terminal);
 	gtk_widget_set_no_show_all(GTK_WIDGET(terminal->menu), TRUE);
-	if (setting->hide_menu_bar) gtk_widget_hide(GTK_WIDGET(terminal->menu));
+	if (terminal->setting->hide_menu_bar) gtk_widget_hide(GTK_WIDGET(terminal->menu));
 	gtk_box_pack_start(GTK_BOX(terminal->box), terminal->menu, FALSE, TRUE, 0);
 
 	/* Create a notebook as the child of the vertical box. */
