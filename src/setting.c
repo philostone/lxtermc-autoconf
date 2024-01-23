@@ -314,7 +314,7 @@ load_setting(gchar *fname)
 	}
 
 	/* Allocate structure. */
-	setting = g_slice_new0(Setting);
+	Setting *setting = g_slice_new0(Setting);
 	setting->config = g_strdup(fname);		// lxtermc
 
 	/* Initialize nonzero integer values to defaults. */

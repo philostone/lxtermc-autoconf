@@ -1424,7 +1424,7 @@ lxtermc_init(LXTermWindow *lxtermwin, CommandArguments *arguments)
 			gchar *system_config = g_build_filename(PACKAGE_DATA_DIR, LXTERMC_NAME,
 				LXTERMC_CONFIG);
 			if (!g_file_test(system_config, G_FILE_TEST_IS_REGULAR)) {
-				fprintf(sdderr, "%s system config does not exist, "
+				fprintf(stderr, "%s system config does not exist, "
 					"using default values!\n", fn);
 		
 	
@@ -1481,7 +1481,7 @@ lxtermc_init(LXTermWindow *lxtermwin, CommandArguments *arguments)
 	gtk_box_pack_start(GTK_BOX(terminal->box), terminal->notebook, TRUE, TRUE, 0);
 
 	/* Initialize tab position. */
-	terminal->tab_position = term_tab_get_position_id(setting->tab_position);
+	terminal->tab_position = term_tab_get_position_id(terminal->setting->tab_position);
 
 	/* Connect signals. */
 	g_signal_connect_swapped(G_OBJECT(terminal->window), "composited-changed",
