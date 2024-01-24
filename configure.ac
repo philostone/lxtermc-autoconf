@@ -1,5 +1,6 @@
+
 AC_PREREQ([2.72])
-AC_INIT([lxtermc],[0.0.2],[http://github.com/philostone/lxtermc])
+AC_INIT([lxtermc],[0.0.1],[http://github.com/philostone/lxtermc])
 AM_INIT_AUTOMAKE([foreign])
 
 AC_CONFIG_HEADERS([config.h])
@@ -14,6 +15,8 @@ AC_CONFIG_HEADERS([config.h])
 
 #AC_PROG_INTLTOOL
 #AM_MAINTAINER_MODE([enable])
+
+# ste - AM_GNU_GETTEXT ?????????????
 
 AC_SEARCH_LIBS([strerror],[cposix])
 AC_PROG_CC
@@ -40,12 +43,13 @@ AC_ARG_ENABLE(more_warnings,
 )
 
 AC_ARG_ENABLE(gtk3,
-AS_HELP_STRING([--enable-gtk3],[enable to use gtk-3.0 instead of gtk-2.0]),
-[case "${enableval}" in
+	[AS_HELP_STRING([--enable-gtk3],[enable to use gtk-3.0 instead of gtk-2.0])],
+	[case "${enableval}" in
 	yes)	enable_gtk3=yes ;;
 	no)	enable_gtk3=no ;;
-	*) AC_MSG_ERROR([bad value "${enableval}" for --enable-gtk3, use "yes" (default) or "no".]) ;;
-esac],[])
+	*)	AC_MSG_ERROR([bad value "${enableval}" for --enable-gtk3, use "yes" (default) or "no".]) ;;
+	esac],[]
+)
 
 # Checks for libraries.
 PKG_CHECK_MODULES([x11], [x11])
@@ -90,7 +94,7 @@ GETTEXT_PACKAGE=lxtermc
 AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [Gettext package.])
 
-#AM_GLIB_GNU_GETTEXT
+AM_GNU_GETTEXT([external])
 
 if test x"$enable_man" = x"yes"; then
 	AC_PATH_PROG([XSLTPROC], [xsltproc])

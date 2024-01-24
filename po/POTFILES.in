@@ -1,5 +1,4 @@
 src/lxtermc.c
 src/preferences.c
 data/lxtermc-preferences.glade
-# files added by intltool-prepare
 data/lxtermc.desktop.in
