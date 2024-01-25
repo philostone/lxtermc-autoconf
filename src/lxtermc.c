@@ -1439,12 +1439,15 @@ lxtermc_init(LXTermWindow *lxtermwin, CommandArguments *arguments)
 	terminal->setting = (cmdline_config) ? load_setting(cmdline_config) : lxtermwin->setting;
 	if (!terminal->setting && user_config) terminal->setting = load_setting(user_config);
 
-	/* Create toplevel window. */
+	/* Create toplevel window -> first widget is realized */
 	terminal->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	terminal->parent->screen = (terminal->parent->screen)
+		?: gtk_widget_get_screen(GTK_WIDGET(terminal->window));
 
 	/* Try to get an RGBA visual (colormap) and assign it to the new window. */
-	GdkVisual *visual = gdk_screen_get_rgba_visual(
-		gtk_widget_get_screen(GTK_WIDGET(terminal->window)));
+//	GdkVisual *visual = gdk_screen_get_rgba_visual(
+//		gtk_widget_get_screen(GTK_WIDGET(terminal->window)));
+	GdkVisual *visual = gdk_screen_get_rgba_visual(terminal->parent->screen);
 	if (visual != NULL) gtk_widget_set_visual(terminal->window, visual);
 
 	/* Set window icon. */
@@ -1592,7 +1595,7 @@ static void
 term_settings_apply(LXTerminal *terminal)
 {
 	/* Reinitialize "composited". */
-	terminal->rgba = gtk_screen_is_composited(terminal->window);
+	terminal->rgba = gdk_screen_is_composited(terminal->window);
 
 	/* Update tab position. */
 	terminal->tab_position = terminal_tab_get_position_id(terminal->setting->tab_position);

@@ -38,6 +38,7 @@
 /* Top level application context. */
 typedef struct _lxtermwindow {
 	Setting *setting;			/* Pointer to current user preferences */
+	GdkScreen *screen;			/* Pointer to screen resources */
 	GPtrArray *windows;			/* Array of pointers to LXTerminal structures */
 } LXTermWindow;
 

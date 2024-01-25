@@ -414,7 +414,7 @@ terminal_preferences_dialog(GtkAction *action, LXTerminal *terminal)
 	if (result == GTK_RESPONSE_OK) {
 		terminal->setting = setting;
 		save_setting(terminal->setting);
-		terminal_settings_apply_to_all(terminal);
+		term_settings_apply_to_all(terminal);
 	} else {
 		free_setting(&setting);
 	}
