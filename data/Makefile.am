@@ -17,7 +17,7 @@ CLEANFILES = $(ui_files)
 
 lxtermc.desktop_in_files = lxtermc.desktop.in
 lxtermc.desktop.in_DATA = $(lxtermc.desktop_in_files:.desktop.in=.desktop)
-@INTLTOOL_DESKTOP_RULE@
+#@INTLTOOL_DESKTOP_RULE@
 lxtermc.desktop.indir = $(datadir)/applications
 
 lxtermc_images_DATA = lxtermc.png

@@ -31,7 +31,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
-#include <glib/gi18n.h>
+#include <glib/gi18n.h>		// implies libintl.h and gives the _(text) syntax
 #include <vte/vte.h>
 #include <langinfo.h>
 #include <locale.h>
@@ -485,7 +485,7 @@ static void
 term_copy_activate_event(GtkAction *action, LXTerminal *terminal)
 {
 	Term *term = g_ptr_array_index(terminal->terms, gtk_notebook_get_current_page(GTK_NOTEBOOK(terminal->notebook)));
-	vte_terminal_copy_clipboard(VTE_TERMINAL(term->vte));
+	vte_terminal_copy_clipboard_format(VTE_TERMINAL(term->vte), VTE_FORMAT_TEXT);
 }
 
 /* Handler for "activate" signal on Edit/Paste menu item.
@@ -563,7 +563,7 @@ term_name_tab_activate_event(GtkAction *action, LXTerminal *terminal)
 	if (gtk_icon_theme_has_icon(gtk_icon_theme_get_default(), "lxterminal")) {
 		gtk_window_set_icon_name(GTK_WINDOW(dialog), "lxterminal");
 	} else {
-		gtk_window_set_icon_from_file(GTK_WINDOW(dialog), PACKAGE_DATA_DIR "/icons/hicolor/128x128/apps/lxterminal.png", NULL);
+		gtk_window_set_icon_from_file(GTK_WINDOW(dialog), PACKAGE_DATA_DIR "/icons/hicolor/128x128/apps/lxtermc.png", NULL);
 	}
 	g_signal_connect(G_OBJECT(dialog), "response", G_CALLBACK(term_name_tab_response_event), term);
 	GtkWidget *dialog_item = gtk_entry_new();
@@ -733,7 +733,7 @@ term_about_activate_event(GtkAction *action, LXTerminal *terminal)
 	gtk_container_set_border_width(GTK_CONTAINER(about_dlg), 2);
 	gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(about_dlg), VERSION);
 	gtk_about_dialog_set_program_name (GTK_ABOUT_DIALOG(about_dlg), _("LXTerminal"));
-	gtk_about_dialog_set_logo(GTK_ABOUT_DIALOG(about_dlg), gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/icons/hicolor/128x128/apps/lxterminal.png", NULL));
+	gtk_about_dialog_set_logo(GTK_ABOUT_DIALOG(about_dlg), gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/icons/hicolor/128x128/apps/lxtermc.png", NULL));
 	gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(about_dlg), _("Copyright (C) 2008-2018"));
 	gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG(about_dlg), _("Terminal emulator for LXDE project"));
 	gtk_about_dialog_set_license(GTK_ABOUT_DIALOG(about_dlg), "This program is free software; you can redistribute it and/or\nmodify it under the terms of the GNU General Public License\nas published by the Free Software Foundation; either version 2\nof the License, or (at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program; if not, write to the Free Software\nFoundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.");
@@ -1384,7 +1384,7 @@ lxtermc_init(LXTermWindow *lxtermwin, CommandArguments *arguments)
 //	Setting *setting = get_setting();
 // ste - here is where config file location is to be determined
 
-	gchar *fn = LXTERMC_NAME"_init(): ";
+	gchar *fn = LXTERMC_NAME"_init():";
 
 	/* find out what config to use */
 	gchar *cmdline_config = arguments->config;
@@ -1408,26 +1408,33 @@ lxtermc_init(LXTermWindow *lxtermwin, CommandArguments *arguments)
 			user_config = NULL;
 		} else if (!g_file_test(user_config, G_FILE_TEST_EXISTS)) {
 			gchar *system_config = g_build_filename(PACKAGE_DATA_DIR, LXTERMC_NAME,
-				LXTERMC_CONFIG);
+				LXTERMC_CONFIG, NULL);
+			fprintf(stderr, "%s system config is : %s\n", fn, system_config);
 			if (!g_file_test(system_config, G_FILE_TEST_IS_REGULAR)) {
 				fprintf(stderr, "%s system config does not exist, "
-					"using default values!\n", fn);
-		
-	
-// TODO GFile * instead of filenames !!!!!
-
-			} else if (!g_file_copy(system_config, user_config,
-				G_FILE_COPY_NONE, NULL, NULL, NULL, NULL)) {
-				fprintf(stderr, "%s failed to copy system config"
-					"to user config dir\n", fn);
-				g_free(user_config);
-				user_config = NULL;
+					"using default values!\n -> %s\n", fn, system_config);
+			} else {
+				GFile *sysconf_gfile = g_file_new_for_path(system_config);
+				GFile *usrconf_gfile = g_file_new_for_path(user_config);
+				if (!g_file_copy(sysconf_gfile, usrconf_gfile,
+					G_FILE_COPY_NONE, NULL, NULL, NULL, NULL)) {
+					fprintf(stderr, "%s failed to copy system config"
+						"to user config dir\n", fn);
+					g_free(user_config);
+					user_config = NULL;
+				}
+				g_free(sysconf_gfile);
+				g_free(usrconf_gfile);
 			}
 			g_free(system_config);
 			system_config = NULL;
 		}
 		g_free(dir);
 	}
+
+	fprintf(stderr, "%s config options  : (after checking)\n", fn);
+	fprintf(stderr, "%s cmdline_config  : %s\n", fn, cmdline_config);
+	fprintf(stderr, "%s user_config     : %s\n", fn, user_config);
 
 	terminal->setting = (cmdline_config) ? load_setting(cmdline_config) : lxtermwin->setting;
 	if (!terminal->setting && user_config) terminal->setting = load_setting(user_config);
@@ -1445,7 +1452,7 @@ lxtermc_init(LXTermWindow *lxtermwin, CommandArguments *arguments)
 		gtk_window_set_icon_name(GTK_WINDOW(terminal->window), "lxterminal");
 	} else {
 		gtk_window_set_icon_from_file(GTK_WINDOW(terminal->window),
-			PACKAGE_DATA_DIR "/icons/hicolor/128x128/apps/lxterminal.png", NULL);
+			PACKAGE_DATA_DIR "/icons/hicolor/128x128/apps/lxtermc.png", NULL);
 	}
 	g_object_weak_ref(G_OBJECT(terminal->window), (GWeakNotify) term_window_exit, terminal);
 
@@ -1585,7 +1592,7 @@ static void
 term_settings_apply(LXTerminal *terminal)
 {
 	/* Reinitialize "composited". */
-	terminal->rgba = gtk_widget_is_composited(terminal->window);
+	terminal->rgba = gtk_screen_is_composited(terminal->window);
 
 	/* Update tab position. */
 	terminal->tab_position = terminal_tab_get_position_id(terminal->setting->tab_position);
@@ -1698,9 +1705,13 @@ main(gint argc, gchar **argv)
 	gtk_init(&argc, &argv);
 
 #ifdef ENABLE_NLS
-	bindtextdomain(GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
-	bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
-	textdomain(GETTEXT_PACKAGE);
+//	bindtextdomain(GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
+//	bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
+//	textdomain(GETTEXT_PACKAGE);
+	setlocale(LC_ALL, "");
+	bindtextdomain(PACKAGE, LOCALE_DIR);
+	bind_textdomain_codeset(PACKAGE, "UTF-8");
+	textdomain(PACKAGE);
 #endif
 
 	/* Parse the command arguments. Exit when needed. */

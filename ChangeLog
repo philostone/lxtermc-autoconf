@@ -1,3 +1,8 @@
+2024-01-25  gettextize  <bug-gnu-gettext@gnu.org>
+
+	* Makefile.am (ACLOCAL_AMFLAGS): New variable.
+	(EXTRA_DIST): New variable.
+
 Changes since 0.2.0
 - Arguments are now properly passed to child process.
 - Fixed login shell, also applies to new tabs. 
