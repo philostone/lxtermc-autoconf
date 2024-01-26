@@ -1439,15 +1439,16 @@ lxtermc_init(LXTermWindow *lxtermwin, CommandArguments *arguments)
 	terminal->setting = (cmdline_config) ? load_setting(cmdline_config) : lxtermwin->setting;
 	if (!terminal->setting && user_config) terminal->setting = load_setting(user_config);
 
-	/* Create toplevel window -> first widget is realized */
+	/* Create toplevel window -> first widget is realized -> get all resources */
 	terminal->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	terminal->parent->screen = (terminal->parent->screen)
+	lxtermwin->screen = (lxtermwin->screen)
 		?: gtk_widget_get_screen(GTK_WIDGET(terminal->window));
+	lxtermwin->display = (lxtermwin->display) ?: gdk_screen_get_display(lxtermwin->screen);
+	lxtermwin->monitor = (lxtermwin->monitor)
+		?: gdk_display_get_primary_monitor(lxtermwin->display);
 
 	/* Try to get an RGBA visual (colormap) and assign it to the new window. */
-//	GdkVisual *visual = gdk_screen_get_rgba_visual(
-//		gtk_widget_get_screen(GTK_WIDGET(terminal->window)));
-	GdkVisual *visual = gdk_screen_get_rgba_visual(terminal->parent->screen);
+	GdkVisual *visual = gdk_screen_get_rgba_visual(lxtermwin->screen);
 	if (visual != NULL) gtk_widget_set_visual(terminal->window, visual);
 
 	/* Set window icon. */
@@ -1546,9 +1547,11 @@ lxtermc_init(LXTermWindow *lxtermwin, CommandArguments *arguments)
 		gint x, y;
 
 		if (geometry_bitmask & XNegative) {
-			GdkScreen *const screen = gtk_window_get_screen(window);
+//			GdkScreen *const screen = gtk_window_get_screen(window);
 			gint window_width, window_height;
 			gtk_window_get_size(window, &window_width, &window_height);
+			
+		
 			x = gdk_screen_get_width(screen)-window_width+arguments->geometry_xoff;
 			if (geometry_bitmask & YNegative) {
 				y = gdk_screen_get_height(screen)-window_height+arguments->geometry_yoff;
@@ -1595,7 +1598,8 @@ static void
 term_settings_apply(LXTerminal *terminal)
 {
 	/* Reinitialize "composited". */
-	terminal->rgba = gdk_screen_is_composited(terminal->window);
+//	terminal->rgba = gdk_screen_is_composited(terminal->window);
+	terminal->rgba = gdk_screen_is_composited(terminal->parent->screen);
 
 	/* Update tab position. */
 	terminal->tab_position = terminal_tab_get_position_id(terminal->setting->tab_position);

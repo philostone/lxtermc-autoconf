@@ -232,15 +232,15 @@ terminal_preferences_dialog(GtkAction *action, LXTerminal *terminal)
 
 	builder = gtk_builder_new();
 	if (!gtk_builder_add_from_file(builder,
-			PACKAGE_DATA_DIR "/lxterminal/lxterminal-preferences.ui", NULL)) {
+			PACKAGE_DATA_DIR"/"LXTERMC_NAME"/lxtermc-preferences.ui", NULL)) {
 		g_object_unref(builder);
 		return;
 	}
 
-	GtkDialog *dialog = GTK_DIALOG(gtk_builder_get_object(builder, "lxterminal_preferences"));
-	gtk_window_set_title(GTK_WINDOW(dialog), _("LXTerminal"));
+	GtkDialog *dialog = GTK_DIALOG(gtk_builder_get_object(builder, "lxtermc_preferences"));
+	gtk_window_set_title(GTK_WINDOW(dialog), _("LXtermc"));
 	gtk_window_set_icon_from_file(GTK_WINDOW(dialog),
-		PACKAGE_DATA_DIR "/icons/hicolor/128x128/apps/lxterminal.png", NULL);
+		PACKAGE_DATA_DIR"/icons/hicolor/128x128/apps/"LXTERMC_NAME".png", NULL);
 
 	GtkWidget *w = GTK_WIDGET(gtk_builder_get_object(builder, "terminal_font"));
 	gtk_font_button_set_font_name(GTK_FONT_BUTTON(w), setting->font_name);

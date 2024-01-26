@@ -39,6 +39,8 @@
 typedef struct _lxtermwindow {
 	Setting *setting;			/* Pointer to current user preferences */
 	GdkScreen *screen;			/* Pointer to screen resources */
+	GdkDisplay *display;			/* Pointer to display resources */
+	GdkMonitor *monitor;			/* Pointer to monitor resources */
 	GPtrArray *windows;			/* Array of pointers to LXTerminal structures */
 } LXTermWindow;
 
@@ -103,6 +105,6 @@ typedef struct _command_arguments {
 
 extern gboolean lxtermc_args(gint argc, gchar **argv, CommandArguments *arguments);
 extern LXTerminal *lxtermc_init(LXTermWindow *lxtermwin, CommandArguments *arguments);
-extern void terminal_settings_apply_to_all(LXTerminal *terminal);
+extern void term_settings_apply_to_all(LXTerminal *terminal);
 
 #endif /* LXTERMC_H */

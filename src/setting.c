@@ -164,6 +164,9 @@ set_setting(Setting *new_setting)
 void
 save_setting(Setting *setting)
 {
+	gchar *fn = "save_setting()";
+	fprintf(stderr, "%s try saving to file: %s\n", fn, setting->config);
+
 	g_return_if_fail(setting != NULL);
 
 	/* Push settings to GKeyFile. */
@@ -227,17 +230,21 @@ save_setting(Setting *setting)
 		if (file_data != NULL) {
 
 			/* Create the file if necessary. */
-			int fd = open(setting->config, O_CREAT | O_WRONLY | O_TRUNC, S_IRUSR | S_IWUSR);
+			int fd = open(setting->config,
+				O_CREAT | O_WRONLY | O_TRUNC, S_IRUSR | S_IWUSR);
 			if (fd < 0) {
-				g_warning("Configuration file create failed: %s\n", g_strerror(errno));
+				g_warning("Configuration file create failed: %s\n",
+					g_strerror(errno));
 			} else {
 				if(write(fd, file_data, strlen(file_data)) < 0)
-					g_warning("Configuration file write failed: %s\n", g_strerror(errno));
+					g_warning("Configuration file write failed: %s\n",
+						g_strerror(errno));
 				close(fd);
 			}
 		}
 		g_free(file_data);
 	}
+	fprintf(stderr, "%s finished saving to file: %s\n", fn, setting->config);
 }
 
 /* Deep copy settings. */
@@ -308,6 +315,8 @@ free_setting(Setting **setting)
 Setting *
 load_setting(gchar *fname)
 {
+	gchar *fn = "load_setting()";
+	fprintf(stderr, "%s trying to load settings from: %s\n", fn, fname);
 	if (!fname) {
 		fprintf(stderr, "load_setting() - no file name provided, "
 			"default settings will be applied\n");
@@ -434,5 +443,6 @@ load_setting(gchar *fname)
 	if (!setting->zoom_out_accel) setting->zoom_out_accel = g_strdup(ZOOM_OUT_ACCEL_DEF);
 	if (!setting->zoom_reset_accel) setting->zoom_reset_accel = g_strdup(ZOOM_RESET_ACCEL_DEF);
 
+	fprintf(stderr, "%s finished loading settings from: %s\n", fn, fname);
 	return setting;
 }
