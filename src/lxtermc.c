@@ -125,30 +125,51 @@ static gchar usage_display[] = {
 /* Actions for menu bar items. */
 static GtkActionEntry menu_items[] =
 {
-/* 0 */		{ "File", NULL, N_("_File"), NULL, NULL, NULL },
-/* 1 */		{ "Edit", NULL, N_("_Edit"), NULL, NULL, NULL },
-/* 2 */		{ "Tabs", NULL, N_("_Tabs"), NULL, NULL, NULL },
-/* 3 */		{ "Help", NULL, N_("_Help"), NULL, NULL, NULL },
-/* 4 */		{ "File_NewWindow", "list-add", N_("_New Window"), NEW_WINDOW_ACCEL_DEF, "New Window", G_CALLBACK(term_new_window_activate_event) },
-/* 5 */		{ "File_NewTab", "list-add", N_("New T_ab"), NEW_TAB_ACCEL_DEF, "New Tab", G_CALLBACK(term_new_tab_activate_event) },
-/* 6 */		{ "File_Sep1", NULL, "Sep" },
-/* 7 */		{ "File_CloseTab", "window-close", N_("_Close Tab"), CLOSE_TAB_ACCEL_DEF, "Close Tab", G_CALLBACK(term_close_tab_activate_event) },
-/* 8 */		{ "File_CloseWindow", "application-exit", N_("Close _Window"), CLOSE_WINDOW_ACCEL_DEF, "Close Window", G_CALLBACK(term_close_window_activate_event) },
-/* 9 */		{ "Edit_Copy", "edit-copy", N_("Cop_y"), COPY_ACCEL_DEF, "Copy", G_CALLBACK(term_copy_activate_event) },
-/* 10 */	{ "Edit_Paste", "edit-paste", N_("_Paste"), PASTE_ACCEL_DEF, "Paste", G_CALLBACK(term_paste_activate_event) },
-/* 11 */	{ "Edit_Clear", NULL, N_("Clear scr_ollback"), NULL, "Clear scrollback", G_CALLBACK(term_clear_activate_event) },
-/* 12 */	{ "Edit_Sep1", NULL, "Sep" },
-/* 13 */	{ "Edit_ZoomIn", "zoom-in", N_("Zoom _In"), ZOOM_IN_ACCEL_DEF, "Zoom In", G_CALLBACK(term_zoom_in_activate_event) },
-/* 14 */	{ "Edit_ZoomOut", "zoom-out", N_("Zoom O_ut"), ZOOM_OUT_ACCEL_DEF, "Zoom Out", G_CALLBACK(term_zoom_out_activate_event) },
-/* 15 */	{ "Edit_ZoomReset", "zoom-fit-best", N_("Zoom _Reset"), ZOOM_RESET_ACCEL_DEF, "Zoom Reset", G_CALLBACK(term_zoom_reset_activate_event) },
-/* 16 */	{ "Edit_Sep2", NULL, "Sep" },
-/* 17 */	{ "Edit_Preferences", "system-run", N_("Preference_s"), NULL, "Preferences", G_CALLBACK(terminal_preferences_dialog) },
-/* 18 */	{ "Tabs_NameTab", "dialog-information", N_("Na_me Tab"), NAME_TAB_ACCEL_DEF, "Name Tab", G_CALLBACK(term_name_tab_activate_event) },
-/* 19 */	{ "Tabs_PreviousTab", "go-previous", N_("Pre_vious Tab"), PREVIOUS_TAB_ACCEL_DEF, "Previous Tab", G_CALLBACK(term_previous_tab_activate_event) },
-/* 20 */	{ "Tabs_NextTab", "go-next", N_("Ne_xt Tab"), NEXT_TAB_ACCEL_DEF, "Next Tab", G_CALLBACK(term_next_tab_activate_event) },
-/* 21 */	{ "Tabs_MoveTabLeft", NULL, N_("Move Tab _Left"), MOVE_TAB_LEFT_ACCEL_DEF, "Move Tab Left", G_CALLBACK(term_move_tab_left_activate_event) },
-/* 22 */	{ "Tabs_MoveTabRight", NULL, N_("Move Tab _Right"), MOVE_TAB_RIGHT_ACCEL_DEF, "Move Tab Right", G_CALLBACK(term_move_tab_right_activate_event) },
-/* 23 */	{ "Help_About", "help-about", N_("_About"), NULL, "About", G_CALLBACK(term_about_activate_event) },
+/*  0 */ { "File", NULL, N_("_File"), NULL, NULL, NULL },
+/*  1 */ { "Edit", NULL, N_("_Edit"), NULL, NULL, NULL },
+/*  2 */ { "Tabs", NULL, N_("_Tabs"), NULL, NULL, NULL },
+/*  3 */ { "Help", NULL, N_("_Help"), NULL, NULL, NULL },
+/*  4 */ { "File_NewWindow", "list-add", N_("_New Window"),
+		NEW_WINDOW_ACCEL_DEF, "New Window", G_CALLBACK(term_new_window_activate_event) },
+/*  5 */ { "File_NewTab", "list-add", N_("New T_ab"),
+		NEW_TAB_ACCEL_DEF, "New Tab", G_CALLBACK(term_new_tab_activate_event) },
+/*  6 */ { "File_Sep1", NULL, "Sep" },
+/*  7 */ { "File_CloseTab", "window-close", N_("_Close Tab"),
+		CLOSE_TAB_ACCEL_DEF, "Close Tab", G_CALLBACK(term_close_tab_activate_event) },
+/*  8 */ { "File_CloseWindow", "application-exit", N_("Close _Window"),
+		CLOSE_WINDOW_ACCEL_DEF, "Close Window",
+		G_CALLBACK(term_close_window_activate_event) },
+/*  9 */ { "Edit_Copy", "edit-copy", N_("Cop_y"),
+		COPY_ACCEL_DEF, "Copy", G_CALLBACK(term_copy_activate_event) },
+/* 10 */ { "Edit_Paste", "edit-paste", N_("_Paste"),
+		PASTE_ACCEL_DEF, "Paste", G_CALLBACK(term_paste_activate_event) },
+/* 11 */ { "Edit_Clear", NULL, N_("Clear scr_ollback"),
+		NULL, "Clear scrollback", G_CALLBACK(term_clear_activate_event) },
+/* 12 */ { "Edit_Sep1", NULL, "Sep" },
+/* 13 */ { "Edit_ZoomIn", "zoom-in", N_("Zoom _In"),
+		ZOOM_IN_ACCEL_DEF, "Zoom In", G_CALLBACK(term_zoom_in_activate_event) },
+/* 14 */ { "Edit_ZoomOut", "zoom-out", N_("Zoom O_ut"),
+		ZOOM_OUT_ACCEL_DEF, "Zoom Out", G_CALLBACK(term_zoom_out_activate_event) },
+/* 15 */ { "Edit_ZoomReset", "zoom-fit-best", N_("Zoom _Reset"),
+		ZOOM_RESET_ACCEL_DEF, "Zoom Reset", G_CALLBACK(term_zoom_reset_activate_event) },
+/* 16 */ { "Edit_Sep2", NULL, "Sep" },
+/* 17 */ { "Edit_Preferences", "system-run", N_("Preference_s"),
+		NULL, "Preferences", G_CALLBACK(terminal_preferences_dialog) },
+/* 18 */ { "Tabs_NameTab", "dialog-information", N_("Na_me Tab"),
+		NAME_TAB_ACCEL_DEF, "Name Tab", G_CALLBACK(term_name_tab_activate_event) },
+/* 19 */ { "Tabs_PreviousTab", "go-previous", N_("Pre_vious Tab"),
+		PREVIOUS_TAB_ACCEL_DEF, "Previous Tab",
+		G_CALLBACK(term_previous_tab_activate_event) },
+/* 20 */ { "Tabs_NextTab", "go-next", N_("Ne_xt Tab"),
+		NEXT_TAB_ACCEL_DEF, "Next Tab", G_CALLBACK(term_next_tab_activate_event) },
+/* 21 */ { "Tabs_MoveTabLeft", NULL, N_("Move Tab _Left"),
+		MOVE_TAB_LEFT_ACCEL_DEF, "Move Tab Left",
+		G_CALLBACK(term_move_tab_left_activate_event) },
+/* 22 */ { "Tabs_MoveTabRight", NULL, N_("Move Tab _Right"),
+		MOVE_TAB_RIGHT_ACCEL_DEF, "Move Tab Right",
+		G_CALLBACK(term_move_tab_right_activate_event) },
+/* 23 */ { "Help_About", "help-about", N_("_About"),
+		NULL, "About", G_CALLBACK(term_about_activate_event) },
 };
 #define MENUBAR_MENUITEM_COUNT G_N_ELEMENTS(menu_items)
 
@@ -156,23 +177,37 @@ static GtkActionEntry menu_items[] =
 static GtkActionEntry vte_menu_items[] =
 {
 	{ "VTEMenu", NULL, "VTEMenu" },
-	{ "NewWindow", "list-add", N_("New _Window"), NULL, "New Window", G_CALLBACK(term_new_window_activate_event) },
-	{ "NewTab", "list-add", N_("New _Tab"), NULL, "New Tab", G_CALLBACK(term_new_tab_activate_event) },
+	{ "NewWindow", "list-add", N_("New _Window"), NULL, "New Window",
+		G_CALLBACK(term_new_window_activate_event) },
+	{ "NewTab", "list-add", N_("New _Tab"), NULL, "New Tab",
+		G_CALLBACK(term_new_tab_activate_event) },
 	{ "Sep1", NULL, "Sep" },
-	{ "OpenURL", NULL, N_("Open _URL"), NULL, "Open URL", G_CALLBACK(term_open_url_activate_event) },
-	{ "CopyURL", NULL, N_("Copy _URL"), NULL, "Copy URL", G_CALLBACK(term_copy_url_activate_event) },
-	{ "Copy", "edit-copy", N_("Cop_y"), NULL, "Copy", G_CALLBACK(term_copy_activate_event) },
-	{ "Paste", "edit-paste", N_("_Paste"), NULL, "Paste", G_CALLBACK(term_paste_activate_event) },
-	{ "Clear", NULL, N_("Cl_ear scrollback"), NULL, "Clear scrollback", G_CALLBACK(term_clear_activate_event) },
+	{ "OpenURL", NULL, N_("Open _URL"), NULL, "Open URL",
+		G_CALLBACK(term_open_url_activate_event) },
+	{ "CopyURL", NULL, N_("Copy _URL"), NULL, "Copy URL",
+		G_CALLBACK(term_copy_url_activate_event) },
+	{ "Copy", "edit-copy", N_("Cop_y"), NULL, "Copy",
+		G_CALLBACK(term_copy_activate_event) },
+	{ "Paste", "edit-paste", N_("_Paste"), NULL, "Paste",
+		G_CALLBACK(term_paste_activate_event) },
+	{ "Clear", NULL, N_("Cl_ear scrollback"), NULL, "Clear scrollback",
+		G_CALLBACK(term_clear_activate_event) },
 	{ "Sep2", NULL, "Sep" },
-	{ "Preferences", "system-run", N_("Preference_s"), NULL, "Preferences", G_CALLBACK(terminal_preferences_dialog) },
+	{ "Preferences", "system-run", N_("Preference_s"), NULL, "Preferences",
+		G_CALLBACK(terminal_preferences_dialog) },
 	{ "Sep3", NULL, "Sep" },
-	{ "NameTab", "dialog-information", N_("Na_me Tab"), NULL, "Name Tab", G_CALLBACK(term_name_tab_activate_event) },
-	{ "PreviousTab", "go-previous", N_("Pre_vious Tab"), NULL, "Previous Tab", G_CALLBACK(term_previous_tab_activate_event) },
-	{ "NextTab", "go-next", N_("Ne_xt Tab"), NULL, "Next Tab", G_CALLBACK(term_next_tab_activate_event) },
-	{ "Tabs_MoveTabLeft", NULL, N_("Move Tab _Left"), NULL, "Move Tab Left", G_CALLBACK(term_move_tab_left_activate_event) },
-	{ "Tabs_MoveTabRight", NULL, N_("Move Tab _Right"), NULL, "Move Tab Right", G_CALLBACK(term_move_tab_right_activate_event) },
-	{ "CloseTab", "window-close", N_("_Close Tab"), NULL, "Close Tab", G_CALLBACK(term_close_tab_activate_event) }
+	{ "NameTab", "dialog-information", N_("Na_me Tab"), NULL, "Name Tab",
+		G_CALLBACK(term_name_tab_activate_event) },
+	{ "PreviousTab", "go-previous", N_("Pre_vious Tab"), NULL, "Previous Tab",
+		G_CALLBACK(term_previous_tab_activate_event) },
+	{ "NextTab", "go-next", N_("Ne_xt Tab"), NULL, "Next Tab",
+		G_CALLBACK(term_next_tab_activate_event) },
+	{ "Tabs_MoveTabLeft", NULL, N_("Move Tab _Left"), NULL, "Move Tab Left",
+		G_CALLBACK(term_move_tab_left_activate_event) },
+	{ "Tabs_MoveTabRight", NULL, N_("Move Tab _Right"), NULL, "Move Tab Right",
+		G_CALLBACK(term_move_tab_right_activate_event) },
+	{ "CloseTab", "window-close", N_("_Close Tab"), NULL, "Close Tab",
+		G_CALLBACK(term_close_tab_activate_event) }
 };
 #define VTE_MENUITEM_COUNT G_N_ELEMENTS(vte_menu_items)
 
@@ -277,9 +312,11 @@ term_initialize_switch_tab_accelerator(Term *term)
 		gtk_accelerator_parse(switch_tab_accel, &key, &mods);
 
 		/* Define the accelerator. */
-		term->closure = g_cclosure_new_swap(G_CALLBACK(term_switch_tab_accelerator), term, NULL);
+		term->closure = g_cclosure_new_swap(G_CALLBACK(term_switch_tab_accelerator),
+			term, NULL);
 		if (gtk_accel_group_from_accel_closure(term->closure) == NULL) {
-			gtk_accel_group_connect(term->parent->accel_group, key, mods, GTK_ACCEL_LOCKED, term->closure);
+			gtk_accel_group_connect(term->parent->accel_group, key, mods,
+				GTK_ACCEL_LOCKED, term->closure);
 		}
 	}
 }
@@ -296,7 +333,8 @@ term_update_alt(LXTerminal *terminal)
 		for (i = 0; i < terminal->terms->len; i++) {
 			term = g_ptr_array_index(terminal->terms, i);
 			if (term->closure != NULL) {
-				gtk_accel_group_disconnect(term->parent->accel_group, term->closure);
+				gtk_accel_group_disconnect(term->parent->accel_group,
+					term->closure);
 			}
 		}
 	} else {
@@ -304,7 +342,8 @@ term_update_alt(LXTerminal *terminal)
 			term = g_ptr_array_index(terminal->terms, i);
 			if (GTK_IS_ACCEL_GROUP(term->parent->accel_group)) {
 				if (term->closure != NULL) {
-					gtk_accel_group_disconnect(term->parent->accel_group, term->closure);
+					gtk_accel_group_disconnect(term->parent->accel_group,
+						term->closure);
 				}
 				term_initialize_switch_tab_accelerator(term);
 			}
@@ -388,7 +427,8 @@ term_new_tab(LXTerminal *terminal, const gchar *label)
 	gchar *proc_cwd = term_get_current_dir(terminal);
 
 	/* Propagate the working directory of the current tab to the new tab.
-	 * If the working directory was determined above, use it; otherwise default to the working directory of the process.
+	 * If the working directory was determined above, use it;
+	 * otherwise default to the working directory of the process.
 	 * Create the new terminal. */
 
 	if (terminal->login_shell) {
@@ -435,7 +475,8 @@ term_vte_size_allocate_event(GtkWidget *widget, GtkAllocation *allocation, Term 
 static void
 term_close_tab_activate_event(GtkAction *action, LXTerminal *terminal)
 {
-	Term *term = g_ptr_array_index(terminal->terms, gtk_notebook_get_current_page(GTK_NOTEBOOK(terminal->notebook)));
+	Term *term = g_ptr_array_index(terminal->terms,
+		gtk_notebook_get_current_page(GTK_NOTEBOOK(terminal->notebook)));
 	term_child_exited_event(VTE_TERMINAL(term->vte), 0, term);
 }
 
@@ -458,7 +499,8 @@ term_close_window_activate_event(GtkAction *action, LXTerminal * terminal)
 static void
 term_open_url_activate_event(GtkAction *action, LXTerminal *terminal)
 {
-	Term *term = g_ptr_array_index(terminal->terms, gtk_notebook_get_current_page(GTK_NOTEBOOK(terminal->notebook)));
+	Term *term = g_ptr_array_index(terminal->terms,
+		gtk_notebook_get_current_page(GTK_NOTEBOOK(terminal->notebook)));
 	if (term->matched_url) {
 		gchar *cmd = g_strdup_printf("xdg-open %s", term->matched_url);
 		if ( ! g_spawn_command_line_async(cmd, NULL))
@@ -472,7 +514,8 @@ term_open_url_activate_event(GtkAction *action, LXTerminal *terminal)
 static void
 term_copy_url_activate_event(GtkAction *action, LXTerminal *terminal)
 {
-	Term *term = g_ptr_array_index(terminal->terms, gtk_notebook_get_current_page(GTK_NOTEBOOK(terminal->notebook)));
+	Term *term = g_ptr_array_index(terminal->terms,
+		gtk_notebook_get_current_page(GTK_NOTEBOOK(terminal->notebook)));
 	if (term->matched_url) {
 		GtkClipboard* clipboard = gtk_clipboard_get(gdk_atom_intern("CLIPBOARD", FALSE));
 		gtk_clipboard_set_text(clipboard, term->matched_url, -1);
@@ -484,7 +527,8 @@ term_copy_url_activate_event(GtkAction *action, LXTerminal *terminal)
 static void
 term_copy_activate_event(GtkAction *action, LXTerminal *terminal)
 {
-	Term *term = g_ptr_array_index(terminal->terms, gtk_notebook_get_current_page(GTK_NOTEBOOK(terminal->notebook)));
+	Term *term = g_ptr_array_index(terminal->terms,
+		gtk_notebook_get_current_page(GTK_NOTEBOOK(terminal->notebook)));
 	vte_terminal_copy_clipboard_format(VTE_TERMINAL(term->vte), VTE_FORMAT_TEXT);
 }
 
@@ -493,7 +537,8 @@ term_copy_activate_event(GtkAction *action, LXTerminal *terminal)
 static void
 term_paste_activate_event(GtkAction *action, LXTerminal *terminal)
 {
-	Term *term = g_ptr_array_index(terminal->terms, gtk_notebook_get_current_page(GTK_NOTEBOOK(terminal->notebook)));
+	Term *term = g_ptr_array_index(terminal->terms,
+		gtk_notebook_get_current_page(GTK_NOTEBOOK(terminal->notebook)));
 	vte_terminal_paste_clipboard(VTE_TERMINAL(term->vte));
 }
 
@@ -502,7 +547,8 @@ term_paste_activate_event(GtkAction *action, LXTerminal *terminal)
 static void
 term_clear_activate_event(GtkAction *action, LXTerminal *terminal)
 {
-	Term *term = g_ptr_array_index(terminal->terms, gtk_notebook_get_current_page(GTK_NOTEBOOK(terminal->notebook)));
+	Term *term = g_ptr_array_index(terminal->terms,
+		gtk_notebook_get_current_page(GTK_NOTEBOOK(terminal->notebook)));
 	vte_terminal_set_scrollback_lines(VTE_TERMINAL(term->vte), 0);
 	vte_terminal_set_scrollback_lines(VTE_TERMINAL(term->vte), terminal->setting->scrollback);
 }
@@ -528,8 +574,10 @@ term_name_tab_response_event(GtkWidget *dialog, gint response, Term *term)
 		}
 
 		/* Set title if term is currently active tab */
-		if (GTK_WIDGET(term->box) == gtk_notebook_get_nth_page(GTK_NOTEBOOK(term->parent->notebook), gtk_notebook_get_current_page(GTK_NOTEBOOK(term->parent->notebook))))
-			gtk_window_set_title(GTK_WINDOW(term->parent->window), title);
+		if (GTK_WIDGET(term->box) == gtk_notebook_get_nth_page(
+			GTK_NOTEBOOK(term->parent->notebook),
+			gtk_notebook_get_current_page(GTK_NOTEBOOK(term->parent->notebook))))
+				gtk_window_set_title(GTK_WINDOW(term->parent->window), title);
 	}
 
 	/* Dismiss dialog. */
@@ -560,15 +608,18 @@ term_name_tab_activate_event(GtkAction *action, LXTerminal *terminal)
 		NULL
 	);
 	gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
-	if (gtk_icon_theme_has_icon(gtk_icon_theme_get_default(), "lxterminal")) {
-		gtk_window_set_icon_name(GTK_WINDOW(dialog), "lxterminal");
+	if (gtk_icon_theme_has_icon(gtk_icon_theme_get_default(), LXTERMC_NAME)) {
+		gtk_window_set_icon_name(GTK_WINDOW(dialog), LXTERMC_NAME);
 	} else {
-		gtk_window_set_icon_from_file(GTK_WINDOW(dialog), PACKAGE_DATA_DIR "/icons/hicolor/128x128/apps/lxtermc.png", NULL);
+		gtk_window_set_icon_from_file(GTK_WINDOW(dialog),
+			PACKAGE_DATA_DIR "/icons/hicolor/128x128/apps/"LXTERMC_NAME".png", NULL);
 	}
-	g_signal_connect(G_OBJECT(dialog), "response", G_CALLBACK(term_name_tab_response_event), term);
+	g_signal_connect(G_OBJECT(dialog), "response",
+		G_CALLBACK(term_name_tab_response_event), term);
 	GtkWidget *dialog_item = gtk_entry_new();
 	g_object_set_data(G_OBJECT(dialog), "entry", (gpointer) dialog_item);
-	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), dialog_item, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), dialog_item,
+		 FALSE, FALSE, 2);
 	gtk_entry_set_text(GTK_ENTRY(dialog_item), gtk_label_get_text(GTK_LABEL(term->label)));
 	gtk_entry_set_activates_default(GTK_ENTRY(dialog_item), TRUE);
 	gtk_widget_show_all(dialog);
@@ -1441,15 +1492,24 @@ lxtermc_init(LXTermWindow *lxtermwin, CommandArguments *arguments)
 
 	/* Create toplevel window -> first widget is realized -> get all resources */
 	terminal->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	lxtermwin->surface = (lxtermin->surface) ?: gtk_native_get_surface(terminal->window);
+	lxtermwin->monitor = (lxtermwin->monitor)
+		?: gdk_display_get_monitor_at_surface(lxtermwin->surface);
+
+				
+		
+/*
 	lxtermwin->screen = (lxtermwin->screen)
 		?: gtk_widget_get_screen(GTK_WIDGET(terminal->window));
 	lxtermwin->display = (lxtermwin->display) ?: gdk_screen_get_display(lxtermwin->screen);
 	lxtermwin->monitor = (lxtermwin->monitor)
 		?: gdk_display_get_primary_monitor(lxtermwin->display);
-
+*/
 	/* Try to get an RGBA visual (colormap) and assign it to the new window. */
+	/* gdk 3.0
 	GdkVisual *visual = gdk_screen_get_rgba_visual(lxtermwin->screen);
 	if (visual != NULL) gtk_widget_set_visual(terminal->window, visual);
+	*/
 
 	/* Set window icon. */
 	if (gtk_icon_theme_has_icon(gtk_icon_theme_get_default(), "lxterminal")) {

@@ -43,37 +43,41 @@ AC_ARG_ENABLE(more_warnings,
 	[enable_more_warnings=no]
 )
 
-AC_ARG_ENABLE(gtk3,
-	[AS_HELP_STRING([--enable-gtk3],[enable to use gtk-3.0 instead of gtk-2.0])],
-	[case "${enableval}" in
-	yes)	enable_gtk3=yes ;;
-	no)	enable_gtk3=no ;;
-	*)	AC_MSG_ERROR([bad value "${enableval}" for --enable-gtk3, use "yes" (default) or "no".]) ;;
-	esac],[]
-)
+#AC_ARG_ENABLE(gtk3,
+#	[AS_HELP_STRING([--enable-gtk3],[enable to use gtk-3.0 instead of gtk-2.0])],
+#	[case "${enableval}" in
+#	yes)	enable_gtk3=yes ;;
+#	no)	enable_gtk3=no ;;
+#	*)	AC_MSG_ERROR([bad value "${enableval}" for --enable-gtk3, use "yes" (default) or "no".]) ;;
+#	esac],[]
+#)
 
 # Checks for libraries.
 PKG_CHECK_MODULES([x11], [x11])
 
-if test "x$enable_gtk3" = "xyes" ; then
-	CFLAGS="$CFLAGS -DENABLE_GTK3"
-	gtk_modules="gtk+-3.0 >= 3.0.0"
-else
-	gtk_modules="gtk+-2.0 >= 2.18.0"
-fi
+#if test "x$enable_gtk3" = "xyes" ; then
+#	CFLAGS="$CFLAGS -DENABLE_GTK3"
+#	gtk_modules="gtk+-3.0 >= 3.0.0"
+#else
+#	gtk_modules="gtk+-2.0 >= 2.18.0"
+#fi
+
+	CFLAGS="$CFLAGS -DENABLE_GTK4"
+	gtk_modules="gtk-4.0 >= 4.0.0"
+
 PKG_CHECK_MODULES(gtk, [$gtk_modules])
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
 
 PKG_CHECK_MODULES(glib, [glib-2.0 >= 2.6.0])
 
-if test "x$enable_gtk3" = "xyes" ; then
+#if test "x$enable_gtk3" = "xyes" ; then
 	PKG_CHECK_MODULES(vte, [vte-2.91 >= 0.20.0],, [
 		PKG_CHECK_MODULES(vte, [vte-2.90 >= 0.20.0])
 	])
-else
-	PKG_CHECK_MODULES(vte, [vte >= 0.20.0])
-fi
+#else
+#	PKG_CHECK_MODULES(vte, [vte >= 0.20.0])
+#fi
 CFLAGS="$CFLAGS $glib_CFLAGS $gtk_CFLAGS $vte_CFLAGS"
 LIBS="$LIBS $glib_LIBS $gtk_LIBS $vte_LIBS $x11_LIBS"
 

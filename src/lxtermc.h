@@ -38,10 +38,12 @@
 /* Top level application context. */
 typedef struct _lxtermwindow {
 	Setting *setting;			/* Pointer to current user preferences */
-	GdkScreen *screen;			/* Pointer to screen resources */
-	GdkDisplay *display;			/* Pointer to display resources */
+//	GdkScreen *screen; gdk3.0			/* Pointer to screen resources */
+	GdkSurface *surface;			/* Pointer to surface resources */
 	GdkMonitor *monitor;			/* Pointer to monitor resources */
 	GPtrArray *windows;			/* Array of pointers to LXTerminal structures */
+
+//	GdkDisplay *display;			/* Pointer to display resources */
 } LXTermWindow;
 
 /* Representative of a toplevel window. */
@@ -59,8 +61,8 @@ typedef struct _lxterminal {
 	GdkGeometry geometry;			/* Geometry hints (see XGetWMNormalHints) */
 	GdkWindowHints geometry_mask;		/* Mask of valid data in geometry hints */
 	gboolean rgba;				/* True if colormap is RGBA */
-	GdkColor background;			/* User preference background color converted to GdkColor */
-	GdkColor foreground;			/* User preference foreground color converted to GdkColor */
+	GdkColor background;			/* User pref bg color converted to GdkColor */
+	GdkColor foreground;			/* User pref fg color converted to GdkColor */
 	gint tab_position;			/* Tab position as an integer value */
 	gboolean login_shell;			/* Terminal will spawn login shells */
 	gdouble scale;				/* Terminal scale */
